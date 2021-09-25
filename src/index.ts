@@ -25,6 +25,21 @@ export const migrate = (
           target = target[key]
         }
       }
+    } else if (type === 'remove') {
+      const { path } = rule
+      const keys = path.split('.')
+
+      let target = data
+
+      for (let i = 0; i < keys.length; i += 1) {
+        const key = keys[i]
+
+        if (i === keys.length - 1) {
+          delete target[key]
+        } else {
+          target = target[key]
+        }
+      }
     }
   }
 
