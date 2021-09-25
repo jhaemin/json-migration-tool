@@ -8,6 +8,7 @@ export type JsonMigrationRule =
   | JsonMigrationAddRule
   | JsonMigrationRemoveRule
   | JsonMigrationMoveRule
+  | JsonMigrationConvertRule
 
 export type JsonMigrationAddRule = {
   type: 'add'
