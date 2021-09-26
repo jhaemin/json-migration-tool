@@ -13,14 +13,24 @@ export const migrate = (
     if (type === 'add') {
       const { path, defaultValue } = rule
 
-      modify(data, path, (target, key) => {
+      inspect(data, path, (target, key) => {
         target[key] = defaultValue
       })
     } else if (type === 'remove') {
       const { path } = rule
 
-      modify(data, path, (target, key) => {
+      inspect(data, path, (target, key) => {
         delete target[key]
+      })
+    } else if (type === 'move') {
+      const { fromPath, toPath } = rule
+
+      inspect(data, fromPath, (fromTarget, fromKey) => {
+        inspect(data, toPath, (toTarget, toKey) => {
+          toTarget[toKey] = fromTarget[fromKey]
+
+          delete fromTarget[fromKey]
+        })
       })
     }
   }
@@ -28,7 +38,7 @@ export const migrate = (
   return data
 }
 
-const modify = (
+const inspect = (
   obj: Record<string, any>,
   path: string,
   callback: (target: Record<string, any>, key: string) => void
