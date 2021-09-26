@@ -12,36 +12,38 @@ export const migrate = (
 
     if (type === 'add') {
       const { path, defaultValue } = rule
-      const keys = path.split('.')
 
-      let target = data
-
-      for (let i = 0; i < keys.length; i += 1) {
-        const key = keys[i]
-
-        if (i === keys.length - 1) {
-          target[key] = defaultValue
-        } else {
-          target = target[key]
-        }
-      }
+      modify(data, path, (target, key) => {
+        target[key] = defaultValue
+      })
     } else if (type === 'remove') {
       const { path } = rule
-      const keys = path.split('.')
 
-      let target = data
-
-      for (let i = 0; i < keys.length; i += 1) {
-        const key = keys[i]
-
-        if (i === keys.length - 1) {
-          delete target[key]
-        } else {
-          target = target[key]
-        }
-      }
+      modify(data, path, (target, key) => {
+        delete target[key]
+      })
     }
   }
 
   return data
+}
+
+const modify = (
+  obj: Record<string, any>,
+  path: string,
+  callback: (target: Record<string, any>, key: string) => void
+) => {
+  const keys = path.split('.')
+
+  let target = obj
+
+  for (let i = 0; i < keys.length; i += 1) {
+    const key = keys[i]
+
+    if (i === keys.length - 1) {
+      callback(target, key)
+    } else {
+      target = target[key]
+    }
+  }
 }
