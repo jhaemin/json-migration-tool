@@ -1,11 +1,11 @@
 import { migrate } from '../../src'
-import rule from './migration-rule'
+import rules from './migration-rule'
 import data from './data.json'
 
 const test = () => {
-  const migratedData = migrate(rule, data)
+  const migratedData = migrate(rules, data)
 
-  console.log(migratedData)
+  console.log(JSON.stringify(migratedData, null, 2))
 }
 
 test()
