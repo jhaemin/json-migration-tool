@@ -1,5 +1,8 @@
 {
   "mankind": {
     "description": "The most intelligent living thing in the Earth."
+  },
+  "robots": {
+    "introduction": "Beep"
   }
 }
