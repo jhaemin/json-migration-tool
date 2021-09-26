@@ -32,6 +32,12 @@ export const migrate = (
           delete fromTarget[fromKey]
         })
       })
+    } else if (type === 'convert') {
+      const { path, convertFunction } = rule
+
+      inspect(data, path, (target, key) => {
+        target[key] = convertFunction(target[key])
+      })
     }
   }
 
