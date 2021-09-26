@@ -29,10 +29,6 @@ export type JsonMigrationMoveRule = {
 
 export type JsonMigrationConvertRule = {
   type: 'convert'
-  fromPath: string
-  toPath: string
-  /**
-   * @default (data) => data
-   */
-  convertFunction?: (data: any) => any
+  path: string
+  convertFunction: (data: any) => any
 }
