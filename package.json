@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test:case1": "npm run build && node dist/test/case1/test.js"
   },
   "author": "Jang Haemin",
   "license": "MIT",
