@@ -1,5 +1,5 @@
 import { migrate } from '../../src'
-import rules from './migration-rule'
+import rules from './migration-rules'
 import data from './data.json'
 
 const test = () => {
