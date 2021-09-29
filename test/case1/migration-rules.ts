@@ -41,6 +41,18 @@ const rules: JsonMigrationRules = [
       }))
     },
   },
+  {
+    type: 'add',
+    path: 'heroes.age',
+    defaultValue: 10,
+    bulk: true,
+  },
+  {
+    type: 'add',
+    path: 'buildings.age',
+    defaultValue: 10,
+    bulk: true,
+  },
 ]
 
 export default rules
