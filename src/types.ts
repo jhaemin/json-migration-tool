@@ -14,6 +14,7 @@ export type JsonMigrationAddRule = {
   type: 'add'
   path: string
   defaultValue: any
+  bulk?: true
 }
 
 export type JsonMigrationRemoveRule = {
