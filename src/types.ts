@@ -1,6 +1,6 @@
 // Assumptions
 // 1. Root is object
-// 2. Every array should be the same type
+// 2. Every item in an array should be the same type
 
 export type JsonMigrationRules = JsonMigrationRule[]
 
