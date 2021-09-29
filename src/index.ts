@@ -11,10 +11,22 @@ export const migrate = (
     const { type } = rule
 
     if (type === 'add') {
-      const { path, defaultValue } = rule
+      const { path, defaultValue, bulk } = rule
 
       inspect(data, path, (target, key) => {
-        target[key] = defaultValue
+        if (bulk === true) {
+          if (Array.isArray(target)) {
+            for (const arrItem of target) {
+              arrItem[key] = defaultValue
+            }
+          } else {
+            for (const objKey of Object.keys(target)) {
+              target[objKey][key] = defaultValue
+            }
+          }
+        } else {
+          target[key] = defaultValue
+        }
       })
     } else if (type === 'remove') {
       const { path } = rule
