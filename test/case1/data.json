@@ -18,5 +18,19 @@
       "name": "Superman",
       "power": "MAX"
     }
+  },
+  "buildings": {
+    "101": {
+      "name": "Hosta",
+      "height": 100
+    },
+    "208": {
+      "name": "Big World",
+      "height": 200
+    },
+    "310": {
+      "name": "New Era",
+      "height": 1000
+    }
   }
 }
