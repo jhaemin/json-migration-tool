@@ -1,20 +1,10 @@
 import { Type } from './type'
 
-export type StringType = {
-  type: 'string'
-  defaultValue?: string
-}
-
 export class String implements Type {
   public defaultValue?: string
-  public alias?: string
 
-  constructor(arg?: {
-    defaultValue?: StringType['defaultValue']
-    alias?: string
-  }) {
+  constructor(arg?: { defaultValue?: string }) {
     this.defaultValue = arg?.defaultValue
-    this.alias = arg?.alias
   }
 
   buildTsType() {
