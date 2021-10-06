@@ -9,12 +9,12 @@ export class String implements Type {
   public defaultValue?: string
   public alias?: string
 
-  constructor(param?: {
+  constructor(arg?: {
     defaultValue?: StringType['defaultValue']
     alias?: string
   }) {
-    this.defaultValue = param?.defaultValue
-    this.alias = param?.alias
+    this.defaultValue = arg?.defaultValue
+    this.alias = arg?.alias
   }
 
   buildTsType() {
@@ -22,6 +22,6 @@ export class String implements Type {
   }
 }
 
-export function string(param?: ConstructorParameters<typeof String>[0]) {
-  return new String(param)
+export function string(arg?: ConstructorParameters<typeof String>[0]) {
+  return new String(arg)
 }
