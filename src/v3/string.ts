@@ -1,14 +1,14 @@
 import { Type } from './type'
 
 export class String implements Type {
-  public defaultValue?: string
-
-  constructor(arg?: { defaultValue?: string }) {
-    this.defaultValue = arg?.defaultValue
-  }
+  constructor(public defaultValue?: string) {}
 
   buildTsType() {
     return 'string'
+  }
+
+  raw() {
+    return `string(${this.defaultValue ? `'${this.defaultValue}'` : ''})`
   }
 }
 
