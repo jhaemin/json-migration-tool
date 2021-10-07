@@ -1,14 +1,14 @@
 import { Type } from './type'
 
 export class Number implements Type {
-  public defaultValue?: number
-
-  constructor(arg?: { defaultValue?: number }) {
-    this.defaultValue = arg?.defaultValue
-  }
+  constructor(public defaultValue?: number) {}
 
   buildTsType() {
     return 'number'
+  }
+
+  raw() {
+    return `number(${this.defaultValue ? `${this.defaultValue}` : ''})`
   }
 }
 
