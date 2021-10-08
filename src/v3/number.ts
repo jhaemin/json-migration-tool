@@ -1,17 +1,9 @@
-import { Type } from './type'
+import { Primitive } from './type'
 
-export class Number implements Type {
-  constructor(public defaultValue?: number) {}
-
-  buildTsType() {
-    return 'number'
-  }
-
-  raw() {
-    return `number(${this.defaultValue ? `${this.defaultValue}` : ''})`
-  }
+export class Number extends Primitive {
+  public typeName = 'string' as const
 }
 
-export function number(arg?: ConstructorParameters<typeof Number>[0]) {
-  return new Number(arg)
+export function number(defaultValue?: number) {
+  return new Number(defaultValue)
 }

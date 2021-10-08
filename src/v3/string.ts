@@ -1,17 +1,11 @@
-import { Type } from './type'
+import { Primitive } from './type'
 
-export class String implements Type {
-  constructor(public defaultValue?: string) {}
+// TODO: literal type
 
-  buildTsType() {
-    return 'string'
-  }
-
-  raw() {
-    return `string(${this.defaultValue ? `'${this.defaultValue}'` : ''})`
-  }
+export class String extends Primitive {
+  public typeName = 'string' as const
 }
 
-export function string(arg?: ConstructorParameters<typeof String>[0]) {
-  return new String(arg)
+export function string(defaultValue?: string) {
+  return new String(defaultValue)
 }
