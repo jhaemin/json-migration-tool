@@ -3,12 +3,12 @@ import { Type } from './type'
 export class Property {
   public key: string
   public type: Type
-  public optional?: boolean
+  public optional: boolean = false
 
   constructor(key: string, type: Type, options?: { optional?: boolean }) {
     this.key = key
     this.type = type
-    this.optional = options?.optional
+    this.optional = options?.optional ?? false
   }
 
   buildTsType(): string {
