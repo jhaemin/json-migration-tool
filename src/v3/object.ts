@@ -35,8 +35,9 @@ export function property(...arg: ConstructorParameters<typeof Property>) {
   return new Property(...arg)
 }
 
-export class Bulk implements Type {
-  public properties: Property[]
+export class ObjectLikeType implements Type {
+  public typeName: 'object' | 'record' = 'object'
+  public properties: Property[] = []
   public alias?: string
 
   constructor(properties: Property[], options?: { alias?: string }) {
@@ -45,8 +46,14 @@ export class Bulk implements Type {
   }
 
   buildTsType() {
-    return `{
+    let objStr = `{
 ${this.properties.map((property) => property.buildTsType()).join('; ')} }`
+
+    if ((this.typeName = 'record')) {
+      objStr = `Record<string, ${objStr}>`
+    }
+
+    return objStr
   }
 
   raw() {
@@ -61,48 +68,73 @@ alias: '${this.alias}',`
       optionsRaw += ' }'
     }
 
-    return `bulk([${this.properties
+    return `${this.typeName}([${this.properties
       .map((property) => property.raw())
       .join(', ')}]${optionsRaw})`
   }
-}
 
-export function bulk(...arg: ConstructorParameters<typeof Bulk>) {
-  return new Bulk(...arg)
-}
+  private compare(
+    properties: Property[],
+    object: Record<string, unknown>
+  ): boolean {
+    const objectKeys = Object.keys(object)
 
-export class Record implements Type {
-  public properties: Property[]
-  public alias?: string
+    if (properties.length !== objectKeys.length) return false
 
-  constructor(properties: Property[], options?: { alias?: string }) {
-    this.properties = properties
-    this.alias = options?.alias
-  }
+    for (const property of properties) {
+      console.log(property.key)
 
-  buildTsType() {
-    return `Record<string, {
-${this.properties.map((property) => property.buildTsType()).join('; ')} }>`
-  }
+      const objectValue = object[property.key]
 
-  raw() {
-    let optionsRaw = ''
+      if (
+        property.optional === false &&
+        objectKeys.indexOf(property.key) === -1
+      ) {
+        return false
+      }
 
-    if (this.alias) {
-      optionsRaw += `, {
-alias: '${this.alias}',`
+      if (property.type.isCorrectType(objectValue) === false) {
+        return false
+      }
+
+      if (
+        property.type instanceof ObjectLikeType &&
+        typeof objectValue === 'object'
+      ) {
+        if (
+          this.compare(
+            property.type.properties,
+            objectValue as Record<string, unknown>
+          ) === false
+        )
+          return false
+      }
     }
 
-    if (optionsRaw) {
-      optionsRaw += ' }'
+    return true
+  }
+
+  isCorrectType(value: unknown) {
+    if (typeof value !== 'object' || value === null) {
+      return false
     }
 
-    return `record([${this.properties
-      .map((property) => property.raw())
-      .join(', ')}]${optionsRaw})`
+    return this.compare(this.properties, value as Record<string, unknown>)
   }
 }
 
-export function record(...arg: ConstructorParameters<typeof Record>) {
-  return new Record(...arg)
+export class ObjectType extends ObjectLikeType {
+  public typeName = 'object' as const
+}
+
+export function object(...arg: ConstructorParameters<typeof ObjectType>) {
+  return new ObjectType(...arg)
+}
+
+export class RecordType extends ObjectLikeType {
+  public typeName = 'record' as const
+}
+
+export function record(...arg: ConstructorParameters<typeof RecordType>) {
+  return new RecordType(...arg)
 }
