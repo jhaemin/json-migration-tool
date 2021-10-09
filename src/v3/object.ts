@@ -1,46 +1,13 @@
+import { InferType } from './helpers'
+import { Property } from './property'
 import { Type } from './type'
 
-export class Property {
-  public key: string
-  public type: Type
-  public optional: boolean = false
-
-  constructor(key: string, type: Type, options?: { optional?: boolean }) {
-    this.key = key
-    this.type = type
-    this.optional = options?.optional ?? false
-  }
-
-  buildTsType(): string {
-    return `${this.key}${this.optional ? '?' : ''}: ${this.type.buildTsType()}`
-  }
-
-  raw() {
-    let optionsRaw = ''
-
-    if (this.optional) {
-      optionsRaw += `, {
-optional: ${this.optional},`
-    }
-
-    if (optionsRaw) {
-      optionsRaw += ' }'
-    }
-
-    return `property('${this.key}', ${this.type.raw()}${optionsRaw})`
-  }
-}
-
-export function property(...arg: ConstructorParameters<typeof Property>) {
-  return new Property(...arg)
-}
-
-export class ObjectLikeType implements Type {
+export class ObjectLikeType<P extends Property> implements Type {
   public typeName: 'object' | 'record' = 'object'
-  public properties: Property[] = []
+  public properties: P[]
   public alias?: string
 
-  constructor(properties: Property[], options?: { alias?: string }) {
+  constructor(properties: P[], options?: { alias?: string }) {
     this.properties = properties
     this.alias = options?.alias
   }
@@ -74,7 +41,7 @@ alias: '${this.alias}',`
   }
 
   private compare(
-    properties: Property[],
+    properties: Property<string, Type>[],
     object: Record<string, unknown>
   ): boolean {
     const objectKeys = Object.keys(object)
@@ -123,18 +90,28 @@ alias: '${this.alias}',`
   }
 }
 
-export class ObjectType extends ObjectLikeType {
+export class ObjectType<
+  P extends Property = Property
+> extends ObjectLikeType<P> {
   public typeName = 'object' as const
 }
 
-export function object(...arg: ConstructorParameters<typeof ObjectType>) {
-  return new ObjectType(...arg)
+export function object<P extends Property>(
+  properties: P[],
+  options?: { alias?: string }
+) {
+  return new ObjectType(properties, options)
 }
 
-export class RecordType extends ObjectLikeType {
+export class RecordType<
+  P extends Property = Property
+> extends ObjectLikeType<P> {
   public typeName = 'record' as const
 }
 
-export function record(...arg: ConstructorParameters<typeof RecordType>) {
-  return new RecordType(...arg)
+export function record<P extends Property>(
+  properties: P[],
+  options?: { alias?: string }
+) {
+  return new RecordType(properties, options)
 }
