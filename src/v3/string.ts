@@ -1,11 +1,11 @@
-import { Primitive } from './type'
-
 // TODO: literal type
 
-export class String extends Primitive {
+import { PrimitiveType } from './primitive'
+
+export class StringType extends PrimitiveType {
   public typeName = 'string' as const
 }
 
 export function string(defaultValue?: string) {
-  return new String(defaultValue)
+  return new StringType(defaultValue)
 }

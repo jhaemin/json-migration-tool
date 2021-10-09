@@ -1,9 +1,9 @@
-import { Primitive } from './type'
+import { PrimitiveType } from './primitive'
 
-export class Number extends Primitive {
-  public typeName = 'string' as const
+export class NumberType extends PrimitiveType {
+  public typeName = 'number' as const
 }
 
 export function number(defaultValue?: number) {
-  return new Number(defaultValue)
+  return new NumberType(defaultValue)
 }
