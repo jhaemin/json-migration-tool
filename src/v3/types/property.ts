@@ -1,5 +1,5 @@
 import { InferType } from './helpers'
-import { Type } from './type'
+import { Type } from './common'
 
 export class Property<
   K extends string = string,
@@ -8,13 +8,13 @@ export class Property<
 > {
   public key: K
   public type: T
-  public optional: Opt
+  public optional?: Opt
   public defaultValue?: InferType<T>
 
   constructor(
     key: K,
     type: T,
-    options?: { optional?: true; defaultValue: InferType<T> }
+    options?: { optional?: Opt; defaultValue?: InferType<T> }
   ) {
     this.key = key
     this.type = type
@@ -33,8 +33,22 @@ export class Property<
     }
   }
 
+  /**
+   *
+   * @returns
+   */
   buildTsType(): string {
-    return `${this.key}${this.optional ? '?' : ''}: ${this.type.buildTsType()}`
+    const comment =
+      this.defaultValue !== undefined
+        ? `/**
+* @default ${JSON.stringify(this.defaultValue, null)}
+*/
+`
+        : ''
+
+    return `${comment}${this.key}${
+      this.optional ? '?' : ''
+    }: ${this.type.buildTsType()}`
   }
 
   raw() {
@@ -51,7 +65,7 @@ optional: ${this.optional},`
 
     if (this.defaultValue !== undefined) {
       optionsRaw += `
-defaultValue: ${JSON.stringify(this.defaultValue)},`
+defaultValue: ${JSON.stringify(this.defaultValue, null, 2)},`
     }
 
     if (optionsRaw) {
@@ -72,7 +86,7 @@ defaultValue: ${JSON.stringify(this.defaultValue)},`
 export function property<K extends string, T extends Type, Opt extends boolean>(
   key: K,
   type: T,
-  options?: { optional?: true; defaultValue: InferType<T> }
+  options?: { optional?: Opt; defaultValue?: InferType<T> }
 ) {
   return new Property(key, type, options)
 }
