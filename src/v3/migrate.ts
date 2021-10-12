@@ -51,6 +51,7 @@ class Migrator<Schema extends JsonRuntimeSchema> {
   constructor(private previousSchema: Schema, private rules: Add<Schema>[]) {}
 
   public migrate(data: unknown) {
+    // Validate the data first
     if (this.validate(data) === false) {
       throw Error(`Given data doesn't fit to the schema.`)
     }
