@@ -8,7 +8,7 @@ JRS is a way you describe a structure of JSON in a runtime TypeScript code. Sinc
 
 ### Why JRS instead of just TS declarations?
 
-TypeScript declarations seem currently the best way to describe a structure of JSON or even any JavaScript data. However, TypeScript can't perfectly inference the difference between a literal object and a Record, which means it is hard to write totally type-safe migration rule without distinguishing them. Fortunately JRS has a dedicated class for each form of [types](#Supporting-Types).
+TypeScript declarations are a great way to describe a structure of JSON or even any JavaScript data. However, TypeScript can't perfectly inference the difference between a literal object and a Record, which means it is hard to write totally type-safe migration rule without distinguishing them. Fortunately JRS has a dedicated class for each form of [types](#Supporting-Types).
 
 ## Type Safety
 
