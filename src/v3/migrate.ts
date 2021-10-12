@@ -61,7 +61,7 @@ class Migrator<Schema extends JsonRuntimeSchema> {
       if (rule instanceof Add) {
         // const keys = (rule.options.to as string).split('.')
 
-        // More precise typings
+        // TODO: More precise typings
         function test(
           objType: ObjectLikeType,
           obj: Record<string, unknown>,
