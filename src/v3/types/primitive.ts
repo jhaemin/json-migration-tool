@@ -26,19 +26,4 @@ export class PrimitiveType<Literal extends string | number | boolean>
 
     return typeof value === this.typeName
   }
-
-  generateValue() {
-    if (this.literal !== undefined) {
-      return this.literal
-    }
-
-    switch (this.typeName) {
-      case 'string':
-        return ''
-      case 'number':
-        return 0
-      case 'boolean':
-        return false
-    }
-  }
 }
