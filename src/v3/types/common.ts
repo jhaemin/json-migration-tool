@@ -1,4 +1,4 @@
-import { ObjectLikeType } from './object'
+import { ObjectType } from './object'
 
 export interface Type {
   typeName:

@@ -81,8 +81,8 @@ export type InferType<T extends Type> = T extends StringType<infer Literal>
   ? null
   : T extends ObjectType<infer Properties>
   ? InferProperties<Properties>
-  : T extends RecordType<infer Properties>
-  ? Record<string, InferProperties<Properties>>
+  : T extends RecordType<infer ValueType>
+  ? Record<string, InferType<ValueType>>
   : T extends ArrayType<infer ItemType>
   ? InferType<ItemType>[]
   : T extends TupleType<infer ItemsType>

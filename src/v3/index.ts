@@ -1,7 +1,5 @@
 import prettier from 'prettier'
-import { InferType } from './types/helpers'
 import {
-  array,
   JsonRuntimeSchema,
   nil,
   number,
@@ -19,19 +17,21 @@ const json = object(
     property(
       'hello',
       record(
-        [
+        object([
           property('test', tuple([string(''), number(4)])),
           property(
             'world',
             union([
               number(),
               string(),
-              record([
-                property('what', string(), {
-                  optional: true,
-                  defaultValue: '',
-                }),
-              ]),
+              record(
+                object([
+                  property('what', string(), {
+                    optional: true,
+                    defaultValue: '',
+                  }),
+                ])
+              ),
             ]),
             {
               optional: true,
@@ -41,11 +41,11 @@ const json = object(
           property(
             'testKey',
             union([
-              record([property('job', number(0))]),
-              record([property('good', number(0))]),
+              record(object([property('job', number(0))])),
+              record(object([property('good', number(0))])),
             ])
           ),
-        ],
+        ]),
         { alias: 'Hello' }
       )
     ),
@@ -60,12 +60,14 @@ export const sample = object([
   property('info', object([property('createdAt', string())])),
   property(
     'blocks',
-    record([
-      property(
-        'styles',
-        object([property('padding', number()), property('margin', number())])
-      ),
-    ])
+    record(
+      object([
+        property(
+          'styles',
+          object([property('padding', number()), property('margin', number())])
+        ),
+      ])
+    )
   ),
 ])
 
