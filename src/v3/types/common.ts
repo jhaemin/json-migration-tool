@@ -13,7 +13,6 @@ export interface Type {
     | 'union'
   alias?: string
   buildTsType(): string
-  generateValue(): unknown
   raw(): string
   isCorrectType(value: unknown): boolean
 }
