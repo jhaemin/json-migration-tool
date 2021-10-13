@@ -4,11 +4,11 @@ import { Type } from './common'
 export class Property<
   K extends string = string,
   T extends Type = Type,
-  Opt extends boolean = boolean
+  Opt extends boolean | undefined = boolean | undefined
 > {
   public key: K
   public type: T
-  public optional?: Opt
+  public optional: Opt
   public defaultValue?: InferType<T>
 
   constructor(
@@ -75,18 +75,15 @@ defaultValue: ${JSON.stringify(this.defaultValue, null, 2)},`
     return `property('${this.key}', ${this.type.raw()}${optionsRaw})`
   }
 
-  /**
-   * Runtime check of default value.
-   */
   isCorrectDefaultValue(value: InferType<T>) {
     return this.type.isCorrectType(value)
   }
 }
 
-export function property<K extends string, T extends Type, Opt extends boolean>(
-  key: K,
-  type: T,
-  options?: { optional?: Opt; defaultValue?: InferType<T> }
-) {
+export function property<
+  K extends string,
+  T extends Type,
+  Opt extends boolean | undefined
+>(key: K, type: T, options?: { optional?: Opt; defaultValue?: InferType<T> }) {
   return new Property(key, type, options)
 }
