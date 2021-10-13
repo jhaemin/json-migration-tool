@@ -18,6 +18,8 @@ export type UnionToIntersection<U> = (
   ? I
   : never
 
+export type IsUnion<T> = [T] extends [UnionToIntersection<T>] ? false : true
+
 export type Unpacked<T> = T extends (infer U)[] ? U : T
 
 export type ArrayToUnion<A> = A extends [infer First, ...infer Rest]
@@ -34,7 +36,11 @@ export type InferProperties<P> = P extends Property[]
                 infer PropertyType,
                 infer Opt
               >
-              ? Opt extends true
+              ? IsUnion<Opt> extends true
+                ? {
+                    [K in PropertyKey]: InferType<PropertyType>
+                  }
+                : Opt extends true
                 ? {
                     [K in PropertyKey]?: InferType<PropertyType>
                   }
