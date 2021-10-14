@@ -5,25 +5,30 @@ import {
   JsonRuntimeSchema,
   number,
   object,
-  ObjectLikeType,
+  ObjectType,
   property,
   Property,
   record,
+  RecordType,
   string,
   Type,
   union,
 } from './types'
 import { InferType } from './types/helpers'
 
-export type PropertyPath<S> = S extends ObjectLikeType<infer Properties>
+export type PropertyPath<S> = S extends ObjectType<infer Properties>
   ? {
       [Idx in keyof Properties]: Idx extends number
         ? Properties[Idx] extends infer P
           ? P extends Property<infer PKey, infer PType>
-            ? PType extends ObjectLikeType
+            ? PType extends ObjectType
               ? `${PKey}` | `${PKey}.${PropertyPath<PType>}`
               : PType extends ArrayType<infer ItemType>
               ? `${PKey}` | `${PKey}.${PropertyPath<ItemType>}`
+              : PType extends RecordType<infer ValueType>
+              ? ValueType extends ObjectType
+                ? `${PKey}.${PropertyPath<ValueType>}`
+                : never
               : never
             : never
           : never
@@ -57,6 +62,8 @@ class Migrator<Schema extends JsonRuntimeSchema> {
     }
 
     const migratedData = JSON.parse(JSON.stringify(data))
+    // Clone previous schema for the next schema
+    // const newSchema
 
     for (const rule of this.rules) {
       if (rule instanceof Add) {
@@ -64,7 +71,7 @@ class Migrator<Schema extends JsonRuntimeSchema> {
 
         // TODO: More precise typings
         function test(
-          objType: ObjectLikeType,
+          objType: ObjectType | RecordType,
           obj: Record<string, unknown>,
           keys: string[],
           targetKey: string,
@@ -78,7 +85,7 @@ class Migrator<Schema extends JsonRuntimeSchema> {
 
             // obj[targetKey] = value
             if (typeof value === 'function') {
-              obj[targetKey] = value(data, indexes)
+              obj[targetKey] = value(JSON.parse(JSON.stringify(data)), indexes)
             } else {
               obj[targetKey] = value
             }
@@ -92,14 +99,16 @@ class Migrator<Schema extends JsonRuntimeSchema> {
 
             if (objType.typeName === 'object') {
               test(
-                nextProperty.type as ObjectLikeType,
+                nextProperty.type as ObjectType,
                 obj[firstKey] as Record<string, unknown>,
                 nextKeys,
                 targetKey,
                 value,
                 indexes
               )
-            } else {
+            } else if (objType) {
+              // Record
+
               const values = Object.entries<Record<string, unknown>>(
                 obj as Record<string, Record<string, unknown>>
               )
@@ -109,7 +118,7 @@ class Migrator<Schema extends JsonRuntimeSchema> {
               for (const [index, o] of values) {
                 console.log(index)
                 test(
-                  nextProperty.type as ObjectLikeType,
+                  nextProperty.type as ObjectType,
                   o[firstKey] as Record<string, unknown>,
                   nextKeys,
                   targetKey,
@@ -145,12 +154,18 @@ export const sample = object([
   property('info', object([property('createdAt', string())])),
   property(
     'blocks',
-    record([
-      property(
-        'styles',
-        object([property('padding', number()), property('margin', number())])
-      ),
-    ])
+    record(
+      object([
+        property(
+          'styles',
+          object([
+            property('padding', number()),
+            property('margin', number()),
+            property('gap', object([property('top', number())])),
+          ])
+        ),
+      ])
+    )
   ),
   property(
     'coupons',
