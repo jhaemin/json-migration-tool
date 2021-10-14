@@ -1,5 +1,5 @@
 import { PropertyPath } from 'src/v3/migrate'
-import { JsonRuntimeSchema, ObjectLikeType, Property, Type } from 'src/v3/types'
+import { JsonRuntimeSchema, Property } from 'src/v3/types'
 import { InferType } from 'src/v3/types/helpers'
 
 /**
