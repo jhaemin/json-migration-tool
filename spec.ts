@@ -85,27 +85,36 @@ function typeNodeToJRS(node?: ts.Node): any {
     return `Array<${typeNodeToJRS(node.elementType)}>`
   }
 
-  // Array<SomeType>
+  // SomeRef<SomeType>
   if (ts.isTypeReferenceNode(node) && ts.isIdentifier(node.typeName)) {
+    // Array<SomeType>
     if (node.typeName.escapedText === 'Array') {
       if (node.typeArguments) {
         return `Array<${JSON.stringify(typeNodeToJRS(node.typeArguments[0]))}>`
       }
+    } else if (node.typeName.escapedText === 'Record') {
+      // Record<SomeType, SomeType>
+
+      if (node.typeArguments) {
+        return `Record<${typeNodeToJRS(node.typeArguments[0])}, ${typeNodeToJRS(
+          node.typeArguments[1]
+        )}>`
+      }
+    } else if (aliases[node.typeName.escapedText as string]) {
+      return aliases[node.typeName.escapedText as string]
+    } else {
+      return 'unknown type reference'
     }
 
     // console.log(JSON.stringify(node.typeArguments, null, 2))
   }
 
+  // ( .. )
   if (ts.isParenthesizedTypeNode(node)) {
     return `(${typeNodeToJRS(node.type)})`
   }
 
-  if (ts.isTypeReferenceNode(node)) {
-    if (ts.isIdentifier(node.typeName)) {
-      return aliases[node.typeName.escapedText as string]
-    }
-  }
-
+  // 'foo', 99
   if (ts.isLiteralTypeNode(node)) {
     if (ts.isStringLiteral(node.literal)) {
       return node.literal.text
@@ -114,6 +123,15 @@ function typeNodeToJRS(node?: ts.Node): any {
     if (ts.isNumericLiteral(node.literal)) {
       return Number(node.literal.text)
     }
+
+    return 'unknown literal type'
+  }
+
+  // [SomeType1, SomeType2]
+  if (ts.isTupleTypeNode(node)) {
+    return `[${node.elements
+      .map((element) => typeNodeToJRS(element))
+      .join(', ')}]`
   }
 
   console.log(node)
