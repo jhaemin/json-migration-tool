@@ -15,7 +15,10 @@ export type Block = {
   styles: Style[]
   obj: {
     foo: string
+    blocks: Record<string, Style>
   }
+  strs: Record<string, string | number>
+  tuples: [string, number]
 }
 
 // export type Arr = (string | number)[]
