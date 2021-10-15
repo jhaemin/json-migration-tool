@@ -118,5 +118,5 @@ function typeNodeToJRS(node?: ts.Node): any {
 
   console.log(node)
 
-  return 'default'
+  return 'unknown'
 }
