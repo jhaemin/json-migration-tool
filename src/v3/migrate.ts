@@ -235,12 +235,18 @@ const oldData: InferType<typeof sample> = {
       styles: {
         padding: 3,
         margin: 10,
+        gap: {
+          top: 1,
+        },
       },
     },
     '6KK87': {
       styles: {
         padding: 0,
         margin: 1,
+        gap: {
+          top: 3,
+        },
       },
     },
   },
@@ -253,6 +259,9 @@ const oldData: InferType<typeof sample> = {
       },
     },
   ],
+  stringRecord: {
+    dd: 'dd',
+  },
 }
 
 const m = migrator.migrate(oldData)
