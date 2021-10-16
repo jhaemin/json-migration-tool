@@ -213,7 +213,7 @@ const item = {
 
 const migrator = new Migrator(sample, [
   add({
-    property: property('boxShadow', string(), {
+    property: property('boxShadow', union([string(), number()]), {
       defaultValue: 'what',
     }),
     at: 'blocks.styles',
