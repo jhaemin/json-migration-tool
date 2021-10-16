@@ -179,6 +179,7 @@ export const sample = object([
       ])
     )
   ),
+  property('stringRecord', record(string())),
 ])
 
 const item = {
