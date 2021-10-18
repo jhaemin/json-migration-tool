@@ -49,15 +49,15 @@ console.log(aliases)
 
 function typeNodeToJRS(node?: ts.Node): any {
   if (!node) {
-    return 'nothing'
+    throw Error('Node is not given')
   }
 
   if (node.kind === ts.SyntaxKind.StringKeyword) {
-    return 'string'
+    return string()
   }
 
   if (node.kind === ts.SyntaxKind.NumberKeyword) {
-    return 'number'
+    return number()
   }
 
   // { foo: SomeType; bar: SomeType }
@@ -72,17 +72,20 @@ function typeNodeToJRS(node?: ts.Node): any {
       }
     })
 
-    return obj
+    // return obj
+    return object(properties as Property[])
   }
 
   // SomeType1 | SomeType2
   if (ts.isUnionTypeNode(node)) {
-    return node.types.map((type) => typeNodeToJRS(type)).join(' | ')
+    // return node.types.map((type) => typeNodeToJRS(type)).join(' | ')
+    return union(node.types.map((type) => typeNodeToJRS(type)))
   }
 
   // SomeType[]
   if (ts.isArrayTypeNode(node)) {
-    return `Array<${typeNodeToJRS(node.elementType)}>`
+    // return `Array<${typeNodeToJRS(node.elementType)}>`
+    return array(typeNodeToJRS(node.elementType))
   }
 
   // SomeRef<SomeType>
@@ -90,51 +93,56 @@ function typeNodeToJRS(node?: ts.Node): any {
     // Array<SomeType>
     if (node.typeName.escapedText === 'Array') {
       if (node.typeArguments) {
-        return `Array<${JSON.stringify(typeNodeToJRS(node.typeArguments[0]))}>`
+        // return `Array<${JSON.stringify(typeNodeToJRS(node.typeArguments[0]))}>`
+        return array(typeNodeToJRS(node.typeArguments[0]))
       }
     } else if (node.typeName.escapedText === 'Record') {
       // Record<SomeType, SomeType>
 
       if (node.typeArguments) {
-        return `Record<${typeNodeToJRS(node.typeArguments[0])}, ${typeNodeToJRS(
-          node.typeArguments[1]
-        )}>`
+        // return `Record<${typeNodeToJRS(node.typeArguments[0])}, ${typeNodeToJRS(
+        //   node.typeArguments[1]
+        // )}>`
+        return record(typeNodeToJRS(node.typeArguments[1]))
       }
     } else if (aliases[node.typeName.escapedText as string]) {
       return aliases[node.typeName.escapedText as string]
-    } else {
-      return 'unknown type reference'
     }
 
-    // console.log(JSON.stringify(node.typeArguments, null, 2))
+    console.log(node.kind)
+    throw Error('Unsupported type reference')
   }
 
   // ( .. )
   if (ts.isParenthesizedTypeNode(node)) {
-    return `(${typeNodeToJRS(node.type)})`
+    // return `(${typeNodeToJRS(node.type)})`
+    return typeNodeToJRS(node.type)
   }
 
-  // 'foo', 99
+  // Literals: 'foo', 99
   if (ts.isLiteralTypeNode(node)) {
     if (ts.isStringLiteral(node.literal)) {
-      return node.literal.text
+      // return node.literal.text
+      return string(node.literal.text)
     }
 
     if (ts.isNumericLiteral(node.literal)) {
-      return Number(node.literal.text)
+      // return Number(node.literal.text)
+      return number(Number(node.literal.text))
     }
 
-    return 'unknown literal type'
+    console.log(node?.kind)
+    throw Error('Unsupported literal type')
   }
 
   // [SomeType1, SomeType2]
   if (ts.isTupleTypeNode(node)) {
-    return `[${node.elements
-      .map((element) => typeNodeToJRS(element))
-      .join(', ')}]`
+    // return `[${node.elements
+    //   .map((element) => typeNodeToJRS(element))
+    //   .join(', ')}]`
+    return tuple(node.elements.map((element) => typeNodeToJRS(element)))
   }
 
-  console.log(node)
-
-  return 'unknown'
+  console.log(node?.kind)
+  throw Error('Unsupported kind of type')
 }
