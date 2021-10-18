@@ -6,8 +6,6 @@ export class StringType<
   public typeName = 'string' as const
 }
 
-export function string<Literal extends string = string>(
-  defaultValue?: Literal
-) {
-  return new StringType(defaultValue)
+export function string<Literal extends string = string>(literal?: Literal) {
+  return new StringType(literal)
 }

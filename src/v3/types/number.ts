@@ -6,8 +6,6 @@ export class NumberType<
   public typeName = 'number' as const
 }
 
-export function number<Literal extends number = number>(
-  defaultValue?: Literal
-) {
-  return new NumberType(defaultValue)
+export function number<Literal extends number = number>(literal?: Literal) {
+  return new NumberType(literal)
 }
