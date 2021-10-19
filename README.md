@@ -37,6 +37,11 @@ Once you write the initial JRS, then you only write the migration rules based on
 - Union
 - Null
 
+### Restrictions
+
+- Always use type alias.
+- Don't use type alias for primitive types or null.
+
 ## Inference raw JSON types from JRS
 
 JMT provides a utility type called `InferType` that inferences
