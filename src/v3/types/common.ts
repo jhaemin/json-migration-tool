@@ -12,7 +12,7 @@ export interface Type {
     | 'null'
     | 'union'
   alias?: string
-  buildTsType(): string
+  _buildTsType(aliases: Map<string, string>, isRoot?: boolean): string
   raw(): string
   isCorrectType(value: unknown): boolean
 }
