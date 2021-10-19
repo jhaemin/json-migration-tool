@@ -13,8 +13,8 @@ export class Union<T extends Type[]> implements Type {
     this.options = options
   }
 
-  buildTsType() {
-    return this.types.map((type) => type.buildTsType()).join(' | ')
+  _buildTsType(aliases: Map<string, string>) {
+    return this.types.map((type) => type._buildTsType(aliases)).join(' | ')
   }
 
   raw() {

@@ -33,11 +33,7 @@ export class Property<
     }
   }
 
-  /**
-   *
-   * @returns
-   */
-  buildTsType(): string {
+  _buildTsType(aliases: Map<string, string>): string {
     const comment =
       this.defaultValue !== undefined
         ? `/**
@@ -48,7 +44,7 @@ export class Property<
 
     return `${comment}${this.key}${
       this.optional ? '?' : ''
-    }: ${this.type.buildTsType()}`
+    }: ${this.type._buildTsType(aliases)}`
   }
 
   raw() {

@@ -10,8 +10,8 @@ export class ArrayType<ItemType extends Type = Type> implements Type {
     this.alias = options?.alias
   }
 
-  buildTsType() {
-    return `(${this.itemType.buildTsType()})[]`
+  _buildTsType(aliases: Map<string, string>) {
+    return `(${this.itemType._buildTsType(aliases)})[]`
   }
 
   raw() {

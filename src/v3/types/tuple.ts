@@ -13,9 +13,9 @@ export class TupleType<ItemTypes extends Type[] = Type[]> implements Type {
     this.options = options
   }
 
-  buildTsType() {
+  _buildTsType(aliases: Map<string, string>) {
     return `[${this.itemTypes
-      .map((itemType) => itemType.buildTsType())
+      .map((itemType) => itemType._buildTsType(aliases))
       .join(', ')}]`
   }
 

@@ -15,9 +15,21 @@ export class ObjectType<P extends Property[] = Property[]> implements Type {
     this.options = options
   }
 
-  buildTsType() {
+  _buildTsType(aliases: Map<string, string>, isRoot?: boolean) {
     let objStr = `{
-${this.properties.map((property) => property.buildTsType()).join('; ')} }`
+${this.properties
+  .map((property) => property._buildTsType(aliases))
+  .join('; ')} }`
+
+    if (isRoot) {
+      return objStr
+    }
+
+    if (this.alias !== undefined) {
+      aliases.set(this.alias, objStr)
+
+      return this.alias
+    }
 
     return objStr
   }

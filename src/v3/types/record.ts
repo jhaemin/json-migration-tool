@@ -13,8 +13,16 @@ export class RecordType<ValueType extends Type = Type> implements Type {
     this.options = options
   }
 
-  buildTsType() {
-    return `Record<string, ${this.valueType.buildTsType()}>`
+  _buildTsType(aliases: Map<string, string>) {
+    const recordStr = `Record<string, ${this.valueType._buildTsType(aliases)}>`
+
+    if (this.alias !== undefined) {
+      aliases.set(this.alias, recordStr)
+
+      return this.alias
+    }
+
+    return recordStr
   }
 
   raw() {

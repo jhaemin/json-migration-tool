@@ -7,7 +7,7 @@ export class PrimitiveType<Literal extends string | number | boolean>
 
   constructor(public literal?: Literal) {}
 
-  buildTsType() {
+  _buildTsType() {
     return this.literal === undefined
       ? this.typeName
       : JSON.stringify(this.literal)

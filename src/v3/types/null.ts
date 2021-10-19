@@ -3,7 +3,7 @@ import { Type } from './common'
 export class NullType implements Type {
   public typeName = 'null' as const
 
-  buildTsType() {
+  _buildTsType() {
     return 'null'
   }
 
