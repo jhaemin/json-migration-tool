@@ -169,3 +169,49 @@ function typeNodeToJRS(
 
   throw Error(`Unsupported kind of type. Kind: ${node.kind}`)
 }
+
+export function parseTsTypes(
+  sourceText: string,
+  rootTypeAliasName: string = 'Root'
+) {
+  const typeAliases: Record<string, Type> = {}
+  const node = ts.createSourceFile(
+    'source.ts',
+    sourceText,
+    ts.ScriptTarget.Latest
+  )
+
+  node.forEachChild((child) => {
+    // Type Alias
+    // ex)
+    // type A = string
+    // type B = { hello: string; world: number }
+    if (ts.isTypeAliasDeclaration(child)) {
+      const typeAliasName = child.name.escapedText as string
+
+      typeAliases[typeAliasName] = typeNodeToJRS(
+        child.type,
+        typeAliases,
+        typeAliasName
+      )
+    }
+  })
+
+  const rootTypeAlias = typeAliases[rootTypeAliasName]
+
+  if (rootTypeAlias === undefined) {
+    throw Error(
+      `Given root type alias name doesn't exist. Root type alias name: ${rootTypeAliasName}`
+    )
+  }
+
+  if (!(rootTypeAlias instanceof ObjectType)) {
+    throw Error(`Given root type alias is not an object type.`)
+  }
+
+  return buildTsType(rootTypeAlias)
+}
+
+const tsType = parseTsTypes(fs.readFileSync('./src/v3/test.ts', 'utf8'))
+
+console.log(tsType)
