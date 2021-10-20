@@ -15,12 +15,6 @@ import {
   union,
 } from './types'
 
-const node = ts.createSourceFile(
-  'x.ts',
-  fs.readFileSync('./src/v3/test.ts', 'utf8'),
-  ts.ScriptTarget.Latest
-)
-
 // NumericLiteral = 8,
 // StringLiteral = 10,
 // Identifier = 79,
@@ -36,29 +30,11 @@ const node = ts.createSourceFile(
 // ParenthesizedType = 189,
 // TypeAliasDeclaration = 257,
 
-const aliases: Record<string, Type> = {}
-
-node.forEachChild((child) => {
-  // Type Alias
-  // ex)
-  // type A = string
-  // type B = { hello: string; world: number }
-  if (ts.isTypeAliasDeclaration(child)) {
-    const typeAliasName = child.name.escapedText as string
-
-    aliases[typeAliasName] = typeNodeToJRS(child.type, typeAliasName)
-  }
-})
-
-console.log(aliases)
-
-const tsType = buildTsType(aliases['Root'] as ObjectType)
-
-console.log(tsType)
-
-function typeNodeToJRS(node: ts.Node, alias?: string): Type | never {
-  console.log(alias)
-
+function typeNodeToJRS(
+  node: ts.Node,
+  typeAliases: Record<string, Type>,
+  typeAliasName?: string
+): Type | never {
   if (node.kind === ts.SyntaxKind.StringKeyword) {
     return string()
   }
@@ -100,7 +76,7 @@ function typeNodeToJRS(node: ts.Node, alias?: string): Type | never {
 
           return property(
             member.name.escapedText as string,
-            typeNodeToJRS(member.type),
+            typeNodeToJRS(member.type, typeAliases),
             { optional: member.questionToken ? true : false, defaultValue }
           )
         }
@@ -116,20 +92,22 @@ function typeNodeToJRS(node: ts.Node, alias?: string): Type | never {
     })
 
     // return obj
-    return object(properties as Property[], { alias })
+    return object(properties as Property[], { alias: typeAliasName })
   }
 
   // SomeType1 | SomeType2
   if (ts.isUnionTypeNode(node)) {
     return union(
-      node.types.map((type) => typeNodeToJRS(type)),
-      { alias }
+      node.types.map((type) => typeNodeToJRS(type, typeAliases)),
+      { alias: typeAliasName }
     )
   }
 
   // SomeType[]
   if (ts.isArrayTypeNode(node)) {
-    return array(typeNodeToJRS(node.elementType), { alias })
+    return array(typeNodeToJRS(node.elementType, typeAliases), {
+      alias: typeAliasName,
+    })
   }
 
   // SomeRef<SomeType>
@@ -137,23 +115,27 @@ function typeNodeToJRS(node: ts.Node, alias?: string): Type | never {
     // Array<SomeType>
     if (node.typeName.escapedText === 'Array') {
       if (node.typeArguments) {
-        return array(typeNodeToJRS(node.typeArguments[0]), { alias })
+        return array(typeNodeToJRS(node.typeArguments[0], typeAliases), {
+          alias: typeAliasName,
+        })
       }
     }
     // Record<SomeType, SomeType>
     else if (node.typeName.escapedText === 'Record') {
       if (node.typeArguments) {
-        return record(typeNodeToJRS(node.typeArguments[1]), { alias })
+        return record(typeNodeToJRS(node.typeArguments[1], typeAliases), {
+          alias: typeAliasName,
+        })
       }
-    } else if (aliases[node.typeName.escapedText as string]) {
+    } else if (typeAliases[node.typeName.escapedText as string]) {
       const aliasName = node.typeName.escapedText as string
-      const alias = aliases[aliasName]
+      const alias = typeAliases[aliasName]
 
       if (alias === undefined) {
         throw Error(`Alias "${aliasName}"" doesn't exist.`)
       }
 
-      return aliases[aliasName]
+      return typeAliases[aliasName]
     }
 
     throw Error(`Unsupported type reference. Kind: ${node.kind}`)
@@ -161,7 +143,7 @@ function typeNodeToJRS(node: ts.Node, alias?: string): Type | never {
 
   // ( .. )
   if (ts.isParenthesizedTypeNode(node)) {
-    return typeNodeToJRS(node.type)
+    return typeNodeToJRS(node.type, typeAliases)
   }
 
   // Literals: 'foo', 99
@@ -180,8 +162,8 @@ function typeNodeToJRS(node: ts.Node, alias?: string): Type | never {
   // [SomeType1, SomeType2]
   if (ts.isTupleTypeNode(node)) {
     return tuple(
-      node.elements.map((element) => typeNodeToJRS(element)),
-      { alias }
+      node.elements.map((element) => typeNodeToJRS(element, typeAliases)),
+      { alias: typeAliasName }
     )
   }
 
