@@ -88,11 +88,23 @@ const prettierOptions: prettier.Options = {
   trailingComma: 'es5',
 }
 
-function buildTsType(json: JsonRuntimeSchema) {
-  return prettier.format(
-    `type ${json.alias ?? 'Json'} = ${json.buildTsType()}`,
-    prettierOptions
-  )
+export function buildTsType(json: JsonRuntimeSchema) {
+  const aliases: Map<string, string> = new Map()
+  const rootTypeStr = json._buildTsType(aliases, true)
+
+  let typeStr = ''
+
+  aliases.forEach((value, key) => {
+    typeStr += `type ${key} = ${value}\n\n`
+  })
+
+  typeStr += `type ${json.alias ?? 'Root'} = ${rootTypeStr}`
+
+  return prettier.format(typeStr, prettierOptions)
+}
+
+export function isJRS(value: any) {
+  return true
 }
 
 // console.log(buildTsType(sample))
