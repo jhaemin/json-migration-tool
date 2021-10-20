@@ -61,12 +61,18 @@ export const sample = object([
   property(
     'blocks',
     record(
-      object([
-        property(
-          'styles',
-          object([property('padding', number()), property('margin', number())])
-        ),
-      ])
+      object(
+        [
+          property(
+            'styles',
+            object([
+              property('padding', number()),
+              property('margin', number()),
+            ])
+          ),
+        ],
+        { alias: 'Block' }
+      )
     )
   ),
 ])
