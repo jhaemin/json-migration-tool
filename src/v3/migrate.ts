@@ -47,6 +47,89 @@ export type MigrationAddRule<
   defaultValue: InferType<T> | ((json: InferType<Schema>) => InferType<T>)
 }
 
+function pathToKeys(path: string) {
+  const regExp = /\[[0-9]+\]$/g
+
+  return path
+    .split('.')
+    .map((item) => {
+      if (item.search(regExp) !== -1) {
+        return item.replace(/\]$/g, '').split('[')
+      }
+
+      return item
+    })
+    .flat()
+}
+
+function isNumberString(str: string) {
+  return Number(str).toString() === str
+}
+
+function testObject(props: {
+  jrs: ObjectType
+  obj: Record<string, any>
+  keys: string[]
+  onEnd?: (obj: object) => void
+}) {
+  const { jrs, obj, keys, onEnd } = props
+
+  if (jrs.isCorrectType(obj) === false) {
+    throw Error('Given obj has a different structure from the given JRS.')
+  }
+
+  // Last key
+  if (keys.length === 0) {
+    onEnd?.(obj as object)
+    return
+  }
+
+  const currentKey = keys.shift()
+
+  // Empty keys
+  if (currentKey === '' || currentKey === undefined) {
+    onEnd?.(obj as object)
+    return
+  }
+
+  const nextObj = obj[currentKey]
+  const nextJrs = jrs.properties.find(({ key }) => key === currentKey)?.type
+
+  if (!nextObj || !nextJrs) {
+    throw Error(`Given key doesn't exist. key: ${currentKey}`)
+  }
+
+  if (nextJrs.typeName === 'object') {
+    testObject({
+      jrs: nextJrs as ObjectType,
+      obj: nextObj,
+      keys: [...keys],
+      onEnd,
+    })
+  } else if (nextJrs.typeName === 'record') {
+    console.log('record')
+    Object.values(nextObj).forEach((value) => {
+      testObject({
+        jrs: (nextJrs as RecordType).valueType as ObjectType,
+        obj: value as Record<string, any>,
+        keys: [...keys],
+        onEnd,
+      })
+    })
+  } else if (nextJrs.typeName === 'array') {
+    ;(nextObj as Array<any>).forEach((item) => {
+      testObject({
+        jrs: (nextJrs as ArrayType).itemType as ObjectType,
+        obj: item as Record<string, any>,
+        keys: [...keys],
+        onEnd,
+      })
+    })
+  } else {
+    throw Error(`Unsupported JRS. JRS type: ${jrs.typeName}. ${nextObj}`)
+  }
+}
+
 export type MigrationRule<
   Schema extends JsonRuntimeSchema,
   T extends Type
