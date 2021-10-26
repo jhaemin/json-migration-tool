@@ -42,7 +42,9 @@ export class RecordType<ValueType extends Type = Type> implements Type {
       return false
     }
 
-    return Object.values(value).every((v) => this.valueType.isCorrectType(v))
+    return Object.entries(value).every(
+      ([k, v]) => typeof k === 'string' && this.valueType.isCorrectType(v)
+    )
   }
 }
 
