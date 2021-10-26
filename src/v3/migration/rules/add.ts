@@ -43,9 +43,9 @@ export class Add<
   At extends PropertyPath<Schema> = PropertyPath<Schema>
 > {
   constructor(
+    public property: P,
     public options: {
-      property: P
-      at?: At
+      at: At
       value:
         | InferType<P['type']>
         | ((
@@ -60,15 +60,17 @@ export function add<
   Schema extends JsonRuntimeSchema,
   P extends Property,
   At extends PropertyPath<Schema> = PropertyPath<Schema>
->(options: {
-  property: P
-  at?: At
-  value:
-    | InferType<P['type']>
-    | ((
-        json: InferType<Schema>,
-        indexes: (string | number)[]
-      ) => InferType<P['type']>)
-}) {
-  return new Add(options)
+>(
+  property: P,
+  options: {
+    at: At
+    value:
+      | InferType<P['type']>
+      | ((
+          json: InferType<Schema>,
+          indexes: (string | number)[]
+        ) => InferType<P['type']>)
+  }
+) {
+  return new Add(property, options)
 }
