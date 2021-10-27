@@ -352,6 +352,13 @@ const oldData: InferType<typeof sample> = {
         prod: '',
       },
     },
+    {
+      couponId: '333',
+      dist: {
+        beta: 'ddd',
+        prod: 'zzz',
+      },
+    },
   ],
   stringRecord: {
     dd: 'dd',
