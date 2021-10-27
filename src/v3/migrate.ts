@@ -306,21 +306,24 @@ const item = {
 }
 
 const migrator = new Migrator(sample, [
-  add({
-    property: property('boxShadow', union([string(), number()]), {
+  add(
+    property('boxShadow', union([string(), number()]), {
       defaultValue: 'what',
     }),
-    at: 'blocks.styles',
-    value: (json, indexes) => {
-      const myStyles = json.blocks[indexes[0]].styles
+    {
+      at: 'coupons',
+      value: (json, indexes) => {
+        const myStyles = json.blocks[indexes[0]].styles
 
-      return (myStyles.padding + myStyles.margin).toString()
-    },
-  }),
+        return (myStyles.padding + myStyles.margin).toString()
+      },
+    }
+  ),
 ])
 
 const oldData: InferType<typeof sample> = {
   version: '1.0.0',
+  sections: [{ what: 'what', hello: [{ test: 0 }] }],
   info: {
     createdAt: '',
   },
