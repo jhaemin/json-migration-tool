@@ -24,7 +24,9 @@ export type PropertyPath<S> = S extends ObjectType<infer Properties>
             ? PType extends ObjectType
               ? `${PKey}` | `${PKey}.${PropertyPath<PType>}`
               : PType extends ArrayType<infer ItemType>
-              ? `${PKey}` | `${PKey}.${PropertyPath<ItemType>}`
+              ? ItemType extends ObjectType
+                ? `${PKey}` | `${PKey}.${PropertyPath<ItemType>}`
+                : never
               : PType extends RecordType<infer ValueType>
               ? ValueType extends ObjectType
                 ? `${PKey}.${PropertyPath<ValueType>}`
