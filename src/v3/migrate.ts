@@ -238,6 +238,15 @@ export const sample = object([
   property('version', string()),
   property('info', object([property('createdAt', string())])),
   property(
+    'sections',
+    array(
+      object([
+        property('what', string()),
+        property('hello', array(object([property('test', number())]))),
+      ])
+    )
+  ),
+  property(
     'blocks',
     record(
       object([
