@@ -152,77 +152,7 @@ class Migrator<Schema extends JsonRuntimeSchema> {
 
     for (const rule of this.rules) {
       if (rule instanceof Add) {
-        // const keys = (rule.options.to as string).split('.')
-
-        // TODO: More precise typings
-        function test(
-          objType: ObjectType | RecordType,
-          obj: Record<string, unknown>,
-          keys: string[],
-          targetKey: string,
-          value: any,
-          indexes: string[]
-        ) {
-          if (keys.length === 0 || (keys.length === 1 && keys[0] === '')) {
-            if (value === undefined) {
-              throw Error(`You have to pass default value.`)
-            }
-
-            // obj[targetKey] = value
-            if (typeof value === 'function') {
-              obj[targetKey] = value(JSON.parse(JSON.stringify(data)), indexes)
-            } else {
-              obj[targetKey] = value
-            }
-          } else {
-            const firstKey = keys[0]
-            const nextProperty = objType.properties.find(
-              ({ key }) => key === firstKey
-            )!
-            const nextKeys = [...keys]
-            nextKeys.shift()
-
-            if (objType.typeName === 'object') {
-              test(
-                nextProperty.type as ObjectType,
-                obj[firstKey] as Record<string, unknown>,
-                nextKeys,
-                targetKey,
-                value,
-                indexes
-              )
-            } else if (objType) {
-              // Record
-
-              const values = Object.entries<Record<string, unknown>>(
-                obj as Record<string, Record<string, unknown>>
-              )
-
-              // console.log(values)
-
-              for (const [index, o] of values) {
-                console.log(index)
-                test(
-                  nextProperty.type as ObjectType,
-                  o[firstKey] as Record<string, unknown>,
-                  nextKeys,
-                  targetKey,
-                  value,
-                  [...indexes, index]
-                )
-              }
-            }
-          }
-        }
-
-        test(
-          this.previousSchema,
-          migratedData,
-          (rule.options.at ?? '').split('.'),
-          rule.options.property.key,
-          rule.options.value,
-          []
-        )
+        const keys = (rule.options.at as string).split('.')
       }
     }
 
