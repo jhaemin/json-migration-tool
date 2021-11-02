@@ -153,6 +153,16 @@ class Migrator<Schema extends JsonRuntimeSchema> {
     for (const rule of this.rules) {
       if (rule instanceof Add) {
         const keys = (rule.options.at as string).split('.')
+
+        testObject({
+          jrs: this.previousSchema,
+          obj: migratedData,
+          keys,
+          onEnd: (obj) => {
+            console.log(obj)
+            obj[rule.property.key] = rule.options.value
+          },
+        })
       }
     }
 
