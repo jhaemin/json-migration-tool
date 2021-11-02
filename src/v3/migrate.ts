@@ -72,7 +72,7 @@ function testObject(props: {
   jrs: ObjectType
   obj: Record<string, any>
   keys: string[]
-  onEnd?: (obj: object) => void
+  onEnd?: (obj: Record<string, any>) => void
 }) {
   const { jrs, obj, keys, onEnd } = props
 
@@ -140,7 +140,7 @@ export type MigrationRule<
 class Migrator<Schema extends JsonRuntimeSchema> {
   constructor(private previousSchema: Schema, private rules: Add<Schema>[]) {}
 
-  public migrate(data: unknown) {
+  public migrate(data: InferType<typeof this.previousSchema>) {
     // Validate the data first
     if (this.validate(data) === false) {
       throw Error(`Given data doesn't fit to the schema.`)
