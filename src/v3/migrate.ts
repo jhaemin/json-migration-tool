@@ -304,18 +304,18 @@ const oldData: InferType<typeof sample> = {
   },
 }
 
-testObject({
-  jrs: sample,
-  obj: oldData,
-  keys: pathToKeys('coupons.dist'),
-  onEnd: (obj) => {
-    console.log(obj)
-  },
-})
+// testObject({
+//   jrs: sample,
+//   obj: oldData,
+//   keys: pathToKeys('coupons.dist'),
+//   onEnd: (obj) => {
+//     console.log(obj)
+//   },
+// })
 
-// const m = migrator.migrate(oldData)
+const m = migrator.migrate(oldData)
 
-// console.log(JSON.stringify(m, null, 2))
+console.log(JSON.stringify(m, null, 2))
 
 type Test<T> = T extends Record<string, unknown>
   ? string extends keyof T
