@@ -242,11 +242,7 @@ const migrator = new Migrator(sample, [
     }),
     {
       at: 'coupons',
-      value: (json, indexes) => {
-        const myStyles = json.blocks[indexes[0]].styles
-
-        return (myStyles.padding + myStyles.margin).toString()
-      },
+      value: 'hello',
     }
   ),
 ])
