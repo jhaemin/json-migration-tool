@@ -38,17 +38,6 @@ export type PropertyPath<S> = S extends ObjectType<infer Properties>
     }[number]
   : never
 
-export type MigrationAddRule<
-  Schema extends JsonRuntimeSchema,
-  T extends Type
-> = {
-  mode: 'add'
-  property: string
-  to: PropertyPath<Schema>
-  type: T
-  defaultValue: InferType<T> | ((json: InferType<Schema>) => InferType<T>)
-}
-
 function pathToKeys(path: string) {
   const regExp = /\[[0-9]+\]$/g
 
