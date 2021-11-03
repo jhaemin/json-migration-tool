@@ -1,4 +1,5 @@
 import { add, Add } from './migration/rules/add'
+import { Remove, remove } from './migration/rules/remove'
 import {
   array,
   ArrayType,
@@ -83,8 +84,9 @@ function testObject(props: {
   obj: Record<string, any>
   keys: string[]
   onEnd?: (obj: Record<string, any>) => void
+  onBeforeEnd?: (obj: Record<string, any>, lastKey: string) => void
 }) {
-  const { jrs, obj, keys, onEnd } = props
+  const { jrs, obj, keys, onEnd, onBeforeEnd } = props
 
   if (jrs.isCorrectType(obj) === false) {
     throw Error('Given obj has a different structure from the given JRS.')
@@ -93,6 +95,12 @@ function testObject(props: {
   // Last key
   if (keys.length === 0) {
     onEnd?.(obj as object)
+    return
+  }
+
+  // Before last key
+  if (keys.length === 1) {
+    onBeforeEnd?.(obj as object, keys[0])
     return
   }
 
@@ -117,6 +125,7 @@ function testObject(props: {
       obj: nextObj,
       keys: [...keys],
       onEnd,
+      onBeforeEnd,
     })
   } else if (nextJrs.typeName === 'record') {
     console.log('record')
@@ -126,6 +135,7 @@ function testObject(props: {
         obj: value as Record<string, any>,
         keys: [...keys],
         onEnd,
+        onBeforeEnd,
       })
     })
   } else if (nextJrs.typeName === 'array') {
@@ -135,6 +145,7 @@ function testObject(props: {
         obj: item as Record<string, any>,
         keys: [...keys],
         onEnd,
+        onBeforeEnd,
       })
     })
   } else {
@@ -143,7 +154,10 @@ function testObject(props: {
 }
 
 class Migrator<Schema extends JsonRuntimeSchema> {
-  constructor(private previousSchema: Schema, private rules: Add<Schema>[]) {}
+  constructor(
+    private previousSchema: Schema,
+    private rules: (Add<Schema> | Remove<Schema>)[]
+  ) {}
 
   public migrate(data: InferType<typeof this.previousSchema>) {
     // Validate the data first
@@ -166,6 +180,17 @@ class Migrator<Schema extends JsonRuntimeSchema> {
           onEnd: (obj) => {
             console.log(obj)
             obj[rule.options.property.key] = rule.options.value
+          },
+        })
+      } else if (rule instanceof Remove) {
+        const keys = (rule.options.at as string).split('.')
+
+        testObject({
+          jrs: this.previousSchema,
+          obj: migratedData,
+          keys,
+          onBeforeEnd: (obj, lastKey) => {
+            delete obj[lastKey]
           },
         })
       }
@@ -258,6 +283,7 @@ const migrator = new Migrator(sample, [
     at: 'sections.hello',
     value: 'hello',
   }),
+  remove({ at: 'sections.hello' }),
 ])
 
 const oldData: InferType<typeof sample> = {
