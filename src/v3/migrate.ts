@@ -15,22 +15,44 @@ import {
 } from './types'
 import { InferType } from './types/helpers'
 
-export type PropertyPath<S> = S extends ObjectType<infer Properties>
+export type OnlyObjectPropertyPath<S> = S extends ObjectType<infer Properties>
   ? {
       [Idx in keyof Properties]: Idx extends number
         ? Properties[Idx] extends infer P
           ? P extends Property<infer PKey, infer PType>
             ? PType extends ObjectType
-              ? `${PKey}` | `${PKey}.${PropertyPath<PType>}`
+              ? `${PKey}` | `${PKey}.${OnlyObjectPropertyPath<PType>}`
               : PType extends ArrayType<infer ItemType>
               ? ItemType extends ObjectType
-                ? `${PKey}` | `${PKey}.${PropertyPath<ItemType>}`
+                ? `${PKey}` | `${PKey}.${OnlyObjectPropertyPath<ItemType>}`
                 : never
               : PType extends RecordType<infer ValueType>
               ? ValueType extends ObjectType
-                ? `${PKey}` | `${PKey}.${PropertyPath<ValueType>}`
+                ? `${PKey}` | `${PKey}.${OnlyObjectPropertyPath<ValueType>}`
                 : never
               : never
+            : never
+          : never
+        : never
+    }[number]
+  : never
+
+export type AllPropertyPath<S> = S extends ObjectType<infer Properties>
+  ? {
+      [Idx in keyof Properties]: Idx extends number
+        ? Properties[Idx] extends infer P
+          ? P extends Property<infer PKey, infer PType>
+            ? PType extends ObjectType
+              ? `${PKey}` | `${PKey}.${AllPropertyPath<PType>}`
+              : PType extends ArrayType<infer ItemType>
+              ? ItemType extends ObjectType
+                ? `${PKey}` | `${PKey}.${AllPropertyPath<ItemType>}`
+                : never
+              : PType extends RecordType<infer ValueType>
+              ? ValueType extends ObjectType
+                ? `${PKey}` | `${PKey}.${AllPropertyPath<ValueType>}`
+                : never
+              : PKey
             : never
           : never
         : never
