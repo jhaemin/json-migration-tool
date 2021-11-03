@@ -11,7 +11,6 @@ import {
   record,
   RecordType,
   string,
-  Type,
   union,
 } from './types'
 import { InferType } from './types/helpers'
@@ -120,11 +119,6 @@ function testObject(props: {
     throw Error(`Unsupported JRS. JRS type: ${jrs.typeName}. ${nextObj}`)
   }
 }
-
-export type MigrationRule<
-  Schema extends JsonRuntimeSchema,
-  T extends Type
-> = MigrationAddRule<Schema, T>
 
 class Migrator<Schema extends JsonRuntimeSchema> {
   constructor(private previousSchema: Schema, private rules: Add<Schema>[]) {}
