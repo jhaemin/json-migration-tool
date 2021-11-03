@@ -143,7 +143,7 @@ class Migrator<Schema extends JsonRuntimeSchema> {
           keys,
           onEnd: (obj) => {
             console.log(obj)
-            obj[rule.property.key] = rule.options.value
+            obj[rule.options.property.key] = rule.options.value
           },
         })
       }
@@ -229,15 +229,13 @@ const item = {
 }
 
 const migrator = new Migrator(sample, [
-  add(
-    property('boxShadow', union([string(), number()]), {
+  add({
+    property: property('boxShadow', union([string(), number()]), {
       defaultValue: 'what',
     }),
-    {
-      at: 'coupons',
-      value: 'hello',
-    }
-  ),
+    at: 'sections.hello',
+    value: 'hello',
+  }),
 ])
 
 const oldData: InferType<typeof sample> = {
