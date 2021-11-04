@@ -1,4 +1,5 @@
 import { add, Add } from './migration/rules/add'
+import { changeType, ChangeType } from './migration/rules/change-type'
 import { Remove, remove } from './migration/rules/remove'
 import {
   array,
@@ -16,44 +17,26 @@ import {
 } from './types'
 import { InferType } from './types/helpers'
 
-export type OnlyObjectPropertyPath<S> = S extends ObjectType<infer Properties>
+export type PropertyPath<S, IncludeLeaf extends boolean> = S extends ObjectType<
+  infer Properties
+>
   ? {
       [Idx in keyof Properties]: Idx extends number
         ? Properties[Idx] extends infer P
           ? P extends Property<infer PKey, infer PType>
             ? PType extends ObjectType
-              ? `${PKey}` | `${PKey}.${OnlyObjectPropertyPath<PType>}`
+              ? `${PKey}` | `${PKey}.${PropertyPath<PType, IncludeLeaf>}`
               : PType extends ArrayType<infer ItemType>
               ? ItemType extends ObjectType
-                ? `${PKey}` | `${PKey}.${OnlyObjectPropertyPath<ItemType>}`
+                ? `${PKey}` | `${PKey}.${PropertyPath<ItemType, IncludeLeaf>}`
                 : never
               : PType extends RecordType<infer ValueType>
               ? ValueType extends ObjectType
-                ? `${PKey}` | `${PKey}.${OnlyObjectPropertyPath<ValueType>}`
+                ? `${PKey}` | `${PKey}.${PropertyPath<ValueType, IncludeLeaf>}`
                 : never
+              : IncludeLeaf extends true
+              ? PKey
               : never
-            : never
-          : never
-        : never
-    }[number]
-  : never
-
-export type AllPropertyPath<S> = S extends ObjectType<infer Properties>
-  ? {
-      [Idx in keyof Properties]: Idx extends number
-        ? Properties[Idx] extends infer P
-          ? P extends Property<infer PKey, infer PType>
-            ? PType extends ObjectType
-              ? `${PKey}` | `${PKey}.${AllPropertyPath<PType>}`
-              : PType extends ArrayType<infer ItemType>
-              ? ItemType extends ObjectType
-                ? `${PKey}` | `${PKey}.${AllPropertyPath<ItemType>}`
-                : never
-              : PType extends RecordType<infer ValueType>
-              ? ValueType extends ObjectType
-                ? `${PKey}` | `${PKey}.${AllPropertyPath<ValueType>}`
-                : never
-              : PKey
             : never
           : never
         : never

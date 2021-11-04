@@ -1,4 +1,4 @@
-import { OnlyObjectPropertyPath } from 'src/v3/migrate'
+import { PropertyPath } from 'src/v3/migrate'
 import { JsonRuntimeSchema, Property } from 'src/v3/types'
 import { InferType } from 'src/v3/types/helpers'
 
@@ -45,7 +45,7 @@ type ValueByKeyPathStr<Obj, Str> = Str extends string
 export class Add<
   Schema extends JsonRuntimeSchema,
   P extends Property = Property,
-  At extends OnlyObjectPropertyPath<Schema> = OnlyObjectPropertyPath<Schema>
+  At extends PropertyPath<Schema, false> = PropertyPath<Schema, false>
 > {
   constructor(
     public options: {
@@ -64,7 +64,7 @@ export class Add<
 export function add<
   Schema extends JsonRuntimeSchema,
   P extends Property,
-  At extends OnlyObjectPropertyPath<Schema> = OnlyObjectPropertyPath<Schema>
+  At extends PropertyPath<Schema, false> = PropertyPath<Schema, false>
 >(options: {
   property: P
   at: At

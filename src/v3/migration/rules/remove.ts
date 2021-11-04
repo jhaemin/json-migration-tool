@@ -1,9 +1,9 @@
-import { AllPropertyPath } from 'src/v3/migrate'
+import { PropertyPath } from 'src/v3/migrate'
 import { JsonRuntimeSchema } from 'src/v3/types'
 
 export class Remove<
   Schema extends JsonRuntimeSchema,
-  At extends AllPropertyPath<Schema> = AllPropertyPath<Schema>
+  At extends PropertyPath<Schema, true> = PropertyPath<Schema, true>
 > {
   constructor(
     public options: {
@@ -14,7 +14,7 @@ export class Remove<
 
 export function remove<
   Schema extends JsonRuntimeSchema,
-  At extends AllPropertyPath<Schema> = AllPropertyPath<Schema>
+  At extends PropertyPath<Schema, true> = PropertyPath<Schema, true>
 >(options: { at: At }) {
   return new Remove<Schema, At>(options)
 }

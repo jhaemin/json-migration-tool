@@ -1,10 +1,10 @@
-import { AllPropertyPath } from 'src/v3/migrate'
+import { PropertyPath } from 'src/v3/migrate'
 import { JsonRuntimeSchema, Type } from 'src/v3/types'
 import { InferType } from 'src/v3/types/helpers'
 
 export class ChangeType<
   Schema extends JsonRuntimeSchema,
-  At extends AllPropertyPath<Schema> = AllPropertyPath<Schema>,
+  At extends PropertyPath<Schema, true> = PropertyPath<Schema, true>,
   T extends Type = Type
 > {
   constructor(
@@ -23,7 +23,7 @@ export class ChangeType<
 
 export function changeType<
   Schema extends JsonRuntimeSchema,
-  At extends AllPropertyPath<Schema> = AllPropertyPath<Schema>,
+  At extends PropertyPath<Schema, true> = PropertyPath<Schema, true>,
   T extends Type = Type
 >(options: {
   at: At
