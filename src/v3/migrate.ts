@@ -83,10 +83,15 @@ function testObject(props: {
   jrs: ObjectType
   obj: Record<string, any>
   keys: string[]
-  onEnd?: (obj: Record<string, any>) => void
-  onBeforeEnd?: (obj: Record<string, any>, lastKey: string) => void
+  onEnd?: (obj: Record<string, any>, indexes: (string | number)[]) => void
+  onBeforeEnd?: (
+    obj: Record<string, any>,
+    lastKey: string,
+    indexes: (string | number)[]
+  ) => void
+  indexes: (string | number)[]
 }) {
-  const { jrs, obj, keys, onEnd, onBeforeEnd } = props
+  const { jrs, obj, keys, onEnd, onBeforeEnd, indexes } = props
 
   if (jrs.isCorrectType(obj) === false) {
     throw Error('Given obj has a different structure from the given JRS.')
@@ -94,13 +99,14 @@ function testObject(props: {
 
   // Last key
   if (keys.length === 0) {
-    onEnd?.(obj as object)
+    onEnd?.(obj as object, [...indexes])
     return
   }
 
-  // Before last key
-  if (keys.length === 1) {
-    onBeforeEnd?.(obj as object, keys[0])
+  // Before the last key,
+  // if the onBeforeEnd exists, execute it and early return.
+  if (keys.length === 1 && onBeforeEnd !== undefined) {
+    onBeforeEnd(obj as object, keys[0], [...indexes])
     return
   }
 
@@ -108,7 +114,7 @@ function testObject(props: {
 
   // Empty keys
   if (currentKey === '' || currentKey === undefined) {
-    onEnd?.(obj as object)
+    onEnd?.(obj as object, [...indexes])
     return
   }
 
@@ -126,26 +132,35 @@ function testObject(props: {
       keys: [...keys],
       onEnd,
       onBeforeEnd,
+      indexes: [...indexes],
     })
   } else if (nextJrs.typeName === 'record') {
     console.log('record')
-    Object.values(nextObj).forEach((value) => {
+    Object.entries(nextObj).forEach(([recordKey, value]) => {
+      const nextIndexes = [...indexes]
+      nextIndexes.push(recordKey)
+
       testObject({
         jrs: (nextJrs as RecordType).valueType as ObjectType,
         obj: value as Record<string, any>,
         keys: [...keys],
         onEnd,
         onBeforeEnd,
+        indexes: nextIndexes,
       })
     })
   } else if (nextJrs.typeName === 'array') {
-    ;(nextObj as Array<any>).forEach((item) => {
+    ;(nextObj as Array<any>).forEach((item, i) => {
+      const nextIndexes = [...indexes]
+      nextIndexes.push(i)
+
       testObject({
         jrs: (nextJrs as ArrayType).itemType as ObjectType,
         obj: item as Record<string, any>,
         keys: [...keys],
         onEnd,
         onBeforeEnd,
+        indexes: nextIndexes,
       })
     })
   } else {
@@ -156,7 +171,7 @@ function testObject(props: {
 class Migrator<Schema extends JsonRuntimeSchema> {
   constructor(
     private previousSchema: Schema,
-    private rules: (Add<Schema> | Remove<Schema>)[]
+    private rules: (Add<Schema> | Remove<Schema> | ChangeType<Schema>)[]
   ) {}
 
   public migrate(data: InferType<typeof this.previousSchema>) {
@@ -170,27 +185,52 @@ class Migrator<Schema extends JsonRuntimeSchema> {
     // const newSchema
 
     for (const rule of this.rules) {
-      if (rule instanceof Add) {
-        const keys = (rule.options.at as string).split('.')
+      const keys = (rule.options.at as string).split('.')
+      const commonArgs = {
+        jrs: this.previousSchema,
+        obj: migratedData,
+        keys,
+        indexes: [],
+      }
 
+      if (rule instanceof Add) {
+        console.log('add')
         testObject({
-          jrs: this.previousSchema,
-          obj: migratedData,
-          keys,
-          onEnd: (obj) => {
-            console.log(obj)
-            obj[rule.options.property.key] = rule.options.value
+          ...commonArgs,
+          onEnd: (obj, indexes) => {
+            // If the property is optional and the given value is undefined,
+            // don't add the property
+            if (
+              rule.options.property.optional === true &&
+              rule.options.value === undefined
+            ) {
+              return
+            }
+
+            // Add the property
+            // - if the value is function -> execute
+            // - else: assign the value
+            obj[rule.options.property.key] =
+              typeof rule.options.value === 'function'
+                ? rule.options.value(JSON.parse(JSON.stringify(data)), indexes)
+                : rule.options.value
           },
         })
       } else if (rule instanceof Remove) {
-        const keys = (rule.options.at as string).split('.')
-
         testObject({
-          jrs: this.previousSchema,
-          obj: migratedData,
-          keys,
+          ...commonArgs,
           onBeforeEnd: (obj, lastKey) => {
             delete obj[lastKey]
+          },
+        })
+      } else if (rule instanceof ChangeType) {
+        testObject({
+          ...commonArgs,
+          onBeforeEnd: (obj, lastKey, indexes) => {
+            obj[lastKey] =
+              typeof rule.options.value === 'function'
+                ? rule.options.value(JSON.parse(JSON.stringify(data)), indexes)
+                : rule.options.value
           },
         })
       }
