@@ -37,6 +37,11 @@ type ValueByKeyPathStr<Obj, Str> = Str extends string
   ? ValueByKeyPathArr<Obj, Split<Str>>
   : never
 
+/**
+ * Rules
+ * - If the property key already exists -> override
+ * - If the property is optional and value is undefined -> don't add the property
+ */
 export class Add<
   Schema extends JsonRuntimeSchema,
   P extends Property = Property,
