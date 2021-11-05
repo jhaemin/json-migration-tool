@@ -50,7 +50,7 @@ export class Add<
   constructor(
     public options: {
       property: P
-      at: At
+      at: At | ''
       value:
         | InferType<P['type']>
         | ((
@@ -67,7 +67,7 @@ export function add<
   At extends PropertyPath<Schema, false> = PropertyPath<Schema, false>
 >(options: {
   property: P
-  at: At
+  at: At | ''
   value:
     | InferType<P['type']>
     | ((
