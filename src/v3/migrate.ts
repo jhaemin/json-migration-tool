@@ -269,35 +269,6 @@ export const sample = object([
   property('stringRecord', record(string())),
 ])
 
-const item = {
-  foo: {
-    bar: {
-      hello: {
-        test: 0,
-        foo: {
-          what: {
-            great: 0,
-          },
-          good: {
-            great: 0,
-          },
-        },
-      },
-      world: {
-        test: 0,
-        foo: {
-          test: {
-            great: 0,
-          },
-          test2: {
-            great: 0,
-          },
-        },
-      },
-    },
-  },
-}
-
 const migrator = new Migrator(sample, [
   add({
     property: property('boxShadow', union([string(), number()]), {
