@@ -6,13 +6,17 @@
 
 JRS is a way you describe a structure of JSON in a runtime TypeScript code. Since JRS is powerfully typed, it can generate TypeScript declarations and also its original source code.
 
-### Why JRS instead of just TS declarations?
+### TypeScript declarations ↔ JRS
 
-TypeScript declarations are a great way to describe a structure of JSON or even any JavaScript data. However, TypeScript can't perfectly inference the difference between a literal object and a Record, which means it is hard to write totally type-safe migration rule without distinguishing them. Fortunately JRS has a dedicated class for each form of [types](#Supporting-Types).
+JMT can generate JRS from TS type aliases(no interface yet).
 
 ## Type Safety
 
-JMT never goes into any fault situations. It checks every type in both compile-time and runtime. So you can write migration rules and migrate with confidence.
+JMT never goes into any fault situations. It checks every type in both compile-time and runtime. So you can write migration rules and migrate the data with confidence.
+
+### Unsoundness
+
+JMT reflects JavaScript and TypeScript's mother nature. It doesn't care about more information than the JRS.
 
 ## Data Safety
 
@@ -33,15 +37,30 @@ Once you write the initial JRS, then you only write the migration rules based on
 - Object
 - Record
 - Array
-- Tuple
+- Tuple (not recommended)
 - Union
 - Null
 
 ### Restrictions
 
-- Always use type alias.
+- Always use type alias. No interface.
 - Don't use type alias for primitive types or null.
 
 ## Inference raw JSON types from JRS
 
-JMT provides a utility type called `InferType` that inferences
+JMT provides a utility type called `InferType` that inferences normal type of JSON from JRS.
+
+For example, a given JRS
+
+```ts
+const jrs = object([property('foo', string()), property('bar', number())])
+```
+
+`InterType<typeof jrs>` should be
+
+```ts
+{
+  foo: string
+  bar: number
+}
+```
