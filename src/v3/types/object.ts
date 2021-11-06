@@ -80,6 +80,26 @@ ${this.properties
 
     return Object.values(value).every((v) => this.compare(v))
   }
+
+  addProperty(property: Property) {
+    if (this.properties.findIndex(({ key }) => key === property.key) !== -1) {
+      throw Error(`Property already exists. key: ${property.key}`)
+    }
+
+    this.properties.push(property)
+  }
+
+  removeProperty(key: string): Property | undefined {
+    const index = this.properties.findIndex(
+      ({ key: propertyKey }) => propertyKey === key
+    )
+
+    if (index === -1) {
+      return
+    }
+
+    return this.properties.splice(index, 1)[0]
+  }
 }
 
 export function object<P extends Property[]>(
