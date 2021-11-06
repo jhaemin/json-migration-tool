@@ -1,49 +1,17 @@
-import { buildTsType } from '.'
-import { add, Add } from './migration/rules/add'
-import { changeType, ChangeType } from './migration/rules/change-type'
-import { move, Move } from './migration/rules/move'
-import { Remove, remove } from './migration/rules/remove'
-import {
-  array,
-  ArrayType,
-  JsonRuntimeSchema,
-  number,
-  object,
-  ObjectType,
-  property,
-  Property,
-  record,
-  RecordType,
-  string,
-  union,
-} from './types'
-import { InferType } from './types/helpers'
-
-export type PropertyPath<S, IncludeLeaf extends boolean> = S extends ObjectType<
-  infer Properties
->
-  ? {
-      [Idx in keyof Properties]: Idx extends number
-        ? Properties[Idx] extends infer P
-          ? P extends Property<infer PKey, infer PType>
-            ? PType extends ObjectType
-              ? `${PKey}` | `${PKey}.${PropertyPath<PType, IncludeLeaf>}`
-              : PType extends ArrayType<infer ItemType>
-              ? ItemType extends ObjectType
-                ? `${PKey}` | `${PKey}.${PropertyPath<ItemType, IncludeLeaf>}`
-                : never
-              : PType extends RecordType<infer ValueType>
-              ? ValueType extends ObjectType
-                ? `${PKey}` | `${PKey}.${PropertyPath<ValueType, IncludeLeaf>}`
-                : never
-              : IncludeLeaf extends true
-              ? PKey
-              : never
-            : never
-          : never
-        : never
-    }[number]
-  : never
+import { buildTsType } from '..'
+import { array, ArrayType } from '../jrs/array'
+import { JsonRuntimeSchema } from '../jrs/common'
+import { InferType } from '../jrs/helpers'
+import { number } from '../jrs/number'
+import { object, ObjectType } from '../jrs/object'
+import { Property, property } from '../jrs/property'
+import { record, RecordType } from '../jrs/record'
+import { string } from '../jrs/string'
+import { union } from '../jrs/union'
+import { add, Add } from './rules/add'
+import { change, Change } from './rules/change'
+import { move, Move } from './rules/move'
+import { Remove, remove } from './rules/remove'
 
 function pathToKeys(path: string) {
   const regExp = /\[[0-9]+\]$/g
@@ -160,18 +128,18 @@ function testObject(props: {
   }
 }
 
-class Migrator<Schema extends JsonRuntimeSchema> {
+export class Migrator<Schema extends JsonRuntimeSchema> {
   constructor(
     private previousSchema: Schema,
     private rules: (
       | Add<Schema>
       | Remove<Schema>
-      | ChangeType<Schema>
+      | Change<Schema>
       | Move<Schema>
     )[]
   ) {}
 
-  public migrate(data: InferType<typeof this.previousSchema>): {
+  public migrate(data: InferType<Schema>): {
     data: any
     jrs: JsonRuntimeSchema
   } {
@@ -287,7 +255,7 @@ class Migrator<Schema extends JsonRuntimeSchema> {
           if (targetJrs) {
             ;(targetJrs as ObjectType).removeProperty(targetKey)
           }
-        } else if (rule instanceof ChangeType) {
+        } else if (rule instanceof Change) {
           let targetJrs: ObjectType | undefined = undefined
           let targetKey: string = ''
 
@@ -381,7 +349,7 @@ const migrator = new Migrator(sample, [
     },
   }),
   remove({ at: 'sections.hello.test' }),
-  changeType({
+  change({
     at: 'blocks.styles',
     type: record(number()),
     value: (json) => {

@@ -1,5 +1,4 @@
-import { valueToString } from '.'
-import { Type } from './common'
+import { Type, valueToString } from './common'
 
 export class Union<T extends Type[]> implements Type {
   public typeName = 'union' as const

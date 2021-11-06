@@ -1,6 +1,7 @@
-import { PropertyPath } from 'src/v3/migrate'
-import { JsonRuntimeSchema, Property } from 'src/v3/types'
-import { InferType } from 'src/v3/types/helpers'
+import { JsonRuntimeSchema } from '../../jrs/common'
+import { InferType } from '../../jrs/helpers'
+import { Property } from '../../jrs/property'
+import { PropertyPath } from '../types'
 
 /**
  * 'a.b.c' -> ['a', 'b', 'c']

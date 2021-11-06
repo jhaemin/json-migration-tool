@@ -1,8 +1,8 @@
-import { PropertyPath } from 'src/v3/migrate'
-import { JsonRuntimeSchema, Type } from 'src/v3/types'
-import { InferType } from 'src/v3/types/helpers'
+import { JsonRuntimeSchema, Type } from '../../jrs/common'
+import { InferType } from '../../jrs/helpers'
+import { PropertyPath } from '../types'
 
-export class ChangeType<
+export class Change<
   Schema extends JsonRuntimeSchema,
   At extends PropertyPath<Schema, true> = PropertyPath<Schema, true>,
   T extends Type = Type
@@ -21,7 +21,7 @@ export class ChangeType<
   ) {}
 }
 
-export function changeType<
+export function change<
   Schema extends JsonRuntimeSchema,
   At extends PropertyPath<Schema, true> = PropertyPath<Schema, true>,
   T extends Type = Type
@@ -32,5 +32,5 @@ export function changeType<
     | InferType<T>
     | ((json: InferType<Schema>, indexes: (string | number)[]) => InferType<T>)
 }) {
-  return new ChangeType(options)
+  return new Change(options)
 }

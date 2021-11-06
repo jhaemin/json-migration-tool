@@ -1,5 +1,5 @@
-import { PropertyPath } from 'src/v3/migrate'
-import { JsonRuntimeSchema } from 'src/v3/types'
+import { JsonRuntimeSchema } from '../../jrs/common'
+import { PropertyPath } from '../types'
 
 export class Move<
   Schema extends JsonRuntimeSchema,

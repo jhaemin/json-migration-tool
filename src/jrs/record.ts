@@ -1,5 +1,4 @@
-import { valueToString } from '.'
-import { Type } from './common'
+import { Type, valueToString } from './common'
 
 export class RecordType<ValueType extends Type = Type> implements Type {
   public typeName = 'record' as const

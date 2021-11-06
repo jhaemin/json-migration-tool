@@ -1,7 +1,5 @@
+import { Type, valueToString } from './common'
 import { Property } from './property'
-import { Type } from './common'
-import { InferType } from './helpers'
-import { valueToString } from '.'
 
 export class ObjectType<P extends Property[] = Property[]> implements Type {
   public typeName = 'object' as const

@@ -1,16 +1,14 @@
-import {
-  ArrayType,
-  BooleanType,
-  NullType,
-  NumberType,
-  ObjectType,
-  Property,
-  RecordType,
-  StringType,
-  TupleType,
-  Type,
-  Union,
-} from './'
+import { ArrayType } from './array'
+import { BooleanType } from './boolean'
+import { Type } from './common'
+import { NullType } from './null'
+import { NumberType } from './number'
+import { ObjectType } from './object'
+import { Property } from './property'
+import { RecordType } from './record'
+import { StringType } from './string'
+import { TupleType } from './tuple'
+import { Union } from './union'
 
 export type UnionToIntersection<U> = (
   U extends any ? (k: U) => void : never

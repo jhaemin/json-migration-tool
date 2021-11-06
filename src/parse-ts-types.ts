@@ -1,19 +1,15 @@
 import fs from 'fs'
 import ts from 'typescript'
 import { buildTsType } from '.'
-import {
-  array,
-  number,
-  object,
-  ObjectType,
-  Property,
-  property,
-  record,
-  string,
-  tuple,
-  Type,
-  union,
-} from './types'
+import { array } from './jrs/array'
+import { Type } from './jrs/common'
+import { number } from './jrs/number'
+import { object, ObjectType } from './jrs/object'
+import { Property, property } from './jrs/property'
+import { record } from './jrs/record'
+import { string } from './jrs/string'
+import { tuple } from './jrs/tuple'
+import { union } from './jrs/union'
 
 // NumericLiteral = 8,
 // StringLiteral = 10,

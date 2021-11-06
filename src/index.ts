@@ -1,77 +1,118 @@
-import { JsonMigrationRule, JsonMigrationRules } from './types'
+import prettier from 'prettier'
+import { JsonRuntimeSchema } from './jrs/common'
+import { nil } from './jrs/null'
+import { number } from './jrs/number'
+import { object } from './jrs/object'
+import { property } from './jrs/property'
+import { record } from './jrs/record'
+import { string } from './jrs/string'
+import { tuple } from './jrs/tuple'
+import { union } from './jrs/union'
 
-export const migrate = (
-  migrationRule: JsonMigrationRule | JsonMigrationRules,
-  json: Record<string, any>
-) => {
-  const rules = Array.isArray(migrationRule) ? migrationRule : [migrationRule]
-  const data = JSON.parse(JSON.stringify(json))
-
-  for (const rule of rules) {
-    const { type } = rule
-
-    if (type === 'add') {
-      const { path, defaultValue, bulk } = rule
-
-      inspect(data, path, (target, key) => {
-        if (bulk === true) {
-          if (Array.isArray(target)) {
-            for (const arrItem of target) {
-              arrItem[key] = defaultValue
+const json = object(
+  [
+    property('foo', union([number(), nil()])),
+    property(
+      'hello',
+      record(
+        object([
+          property('test', tuple([string(''), number(4)])),
+          property(
+            'world',
+            union([
+              number(),
+              string(),
+              record(
+                object([
+                  property('what', string(), {
+                    optional: true,
+                    defaultValue: '',
+                  }),
+                ])
+              ),
+            ]),
+            {
+              optional: true,
+              defaultValue: 3,
             }
-          } else {
-            for (const objKey of Object.keys(target)) {
-              target[objKey][key] = defaultValue
-            }
-          }
-        } else {
-          target[key] = defaultValue
-        }
-      })
-    } else if (type === 'remove') {
-      const { path } = rule
-
-      inspect(data, path, (target, key) => {
-        delete target[key]
-      })
-    } else if (type === 'move') {
-      const { fromPath, toPath } = rule
-
-      inspect(data, fromPath, (fromTarget, fromKey) => {
-        inspect(data, toPath, (toTarget, toKey) => {
-          toTarget[toKey] = fromTarget[fromKey]
-
-          delete fromTarget[fromKey]
-        })
-      })
-    } else if (type === 'convert') {
-      const { path, convertFunction } = rule
-
-      inspect(data, path, (target, key) => {
-        target[key] = convertFunction(target[key])
-      })
-    }
+          ),
+          property(
+            'testKey',
+            union([
+              record(object([property('job', number(0))])),
+              record(object([property('good', number(0))])),
+            ])
+          ),
+        ]),
+        { alias: 'Hello' }
+      )
+    ),
+  ],
+  {
+    alias: 'Meta',
   }
+)
 
-  return data
+export const sample = object([
+  property('version', string()),
+  property('info', object([property('createdAt', string())])),
+  property(
+    'blocks',
+    record(
+      object(
+        [
+          property(
+            'styles',
+            object([
+              property('padding', number()),
+              property('margin', number()),
+            ])
+          ),
+        ],
+        { alias: 'Block' }
+      )
+    )
+  ),
+])
+
+// console.log(JSON.stringify(json.raw(), null, 2))
+
+const prettierOptions: prettier.Options = {
+  parser: 'typescript',
+  useTabs: false,
+  tabWidth: 2,
+  singleQuote: true,
+  semi: false,
+  trailingComma: 'es5',
 }
 
-const inspect = (
-  obj: Record<string, any>,
-  path: string,
-  callback: (target: Record<string, any>, key: string) => void
-) => {
-  const keys = path.split('.')
+export function buildTsType(json: JsonRuntimeSchema) {
+  const aliases: Map<string, string> = new Map()
+  const rootTypeStr = json._buildTsType(aliases, true)
 
-  let target = obj
+  let typeStr = ''
 
-  for (let i = 0; i < keys.length; i += 1) {
-    const key = keys[i]
+  aliases.forEach((value, key) => {
+    typeStr += `type ${key} = ${value}\n\n`
+  })
 
-    if (i === keys.length - 1) {
-      callback(target, key)
-    } else {
-      target = target[key]
-    }
-  }
+  typeStr += `type ${json.alias ?? 'Root'} = ${rootTypeStr}`
+
+  return prettier.format(typeStr, prettierOptions)
 }
+
+export function isJRS(value: any) {
+  return true
+}
+
+// console.log(buildTsType(sample))
+
+function raw(json: JsonRuntimeSchema) {
+  return prettier.format(json.raw(), prettierOptions)
+}
+
+// console.log(buildTsType(json))
+
+// console.log(json.raw())
+// console.log(raw(json))
+// console.log(buildTsType(json))
