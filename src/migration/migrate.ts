@@ -219,13 +219,19 @@ export class Migrator<Schema extends JsonRuntimeSchema> {
               // Add the property
               // - if the value is function -> execute
               // - else: assign the value
-              obj[rule.options.property.key] =
+              const value =
                 typeof rule.options.value === 'function'
                   ? rule.options.value(
                       JSON.parse(JSON.stringify(data)),
                       indexes
                     )
                   : rule.options.value
+
+              if (!rule.options.property.type.isCorrectType(value)) {
+                throw Error(`Incorrect type of value. value: ${value}`)
+              }
+
+              obj[rule.options.property.key] = value
 
               targetJrs = jrs
             },
@@ -259,13 +265,20 @@ export class Migrator<Schema extends JsonRuntimeSchema> {
             onBeforeEnd: (obj, jrs, lastKey, indexes) => {
               targetJrs = jrs
               targetKey = lastKey
-              obj[lastKey] =
+
+              const value =
                 typeof rule.options.value === 'function'
                   ? rule.options.value(
                       JSON.parse(JSON.stringify(data)),
                       indexes
                     )
                   : rule.options.value
+
+              if (!rule.options.type.isCorrectType(value)) {
+                throw Error(`Incorrect type of value. value: ${value}`)
+              }
+
+              obj[lastKey] = value
             },
           })
 
