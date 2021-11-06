@@ -53,8 +53,6 @@ function testObject(props: {
   const { jrs, obj, keys, onEnd, onBeforeEnd, indexes } = props
 
   if (jrs.isCorrectType(obj) === false) {
-    console.log(JSON.stringify(obj, null, 2))
-    console.log(buildTsType(jrs))
     throw Error('Given obj has a different structure from the given JRS.')
   }
 
@@ -154,7 +152,6 @@ export class Migrator<Schema extends JsonRuntimeSchema> {
 
     for (const rule of this.rules) {
       if (rule instanceof Move) {
-        console.log('move')
         const fromKeys = (rule.options.from as string).split('.')
         const toKeys = (rule.options.to.path as string).split('.')
 
@@ -205,7 +202,6 @@ export class Migrator<Schema extends JsonRuntimeSchema> {
         }
 
         if (rule instanceof Add) {
-          console.log('add')
           let targetJrs: ObjectType | undefined = undefined
 
           testObject({
@@ -239,7 +235,6 @@ export class Migrator<Schema extends JsonRuntimeSchema> {
             ;(targetJrs as ObjectType).addProperty(rule.options.property)
           }
         } else if (rule instanceof Remove) {
-          console.log('remove')
           let targetJrs: ObjectType | undefined = undefined
           let targetKey: string = ''
 
@@ -428,10 +423,10 @@ const oldData: InferType<typeof sample> = {
 //   },
 // })
 
-const { data: m, jrs } = migrator.migrate(oldData)
+// const { data: m, jrs } = migrator.migrate(oldData)
 
-console.log(JSON.stringify(m, null, 2))
-console.log(buildTsType(jrs))
+// console.log(JSON.stringify(m, null, 2))
+// console.log(buildTsType(jrs))
 
 type Test<T> = T extends Record<string, unknown>
   ? string extends keyof T
