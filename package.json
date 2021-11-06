@@ -4,13 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "test:case1": "npm run build && node dist/test/case1/test.js"
+    "build": "rm -rf dist/* && tsc",
+    "test": "jest --verbose"
   },
   "author": "Jang Haemin",
   "license": "MIT",
   "devDependencies": {
+    "@types/jest": "^27.0.2",
     "@types/prettier": "^2.4.1",
+    "fast-deep-equal": "^3.1.3",
+    "jest": "^27.3.1",
     "prettier": "^2.4.1",
     "ts-morph": "^12.0.0",
     "ts-node": "^10.2.1",

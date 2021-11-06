@@ -2,8 +2,6 @@
   "compilerOptions": {
     "target": "es6",
     "module": "commonjs",
-    "baseUrl": "./",
-    "paths": {},
     "allowJs": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
@@ -12,5 +10,6 @@
     "outDir": "./dist",
     "strict": true,
     "skipLibCheck": true
-  }
+  },
+  "exclude": ["__TEST__"]
 }
