@@ -1,5 +1,7 @@
+import { buildTsType } from '.'
 import { add, Add } from './migration/rules/add'
 import { changeType, ChangeType } from './migration/rules/change-type'
+import { move, Move } from './migration/rules/move'
 import { Remove, remove } from './migration/rules/remove'
 import {
   array,
@@ -66,30 +68,38 @@ function testObject(props: {
   jrs: ObjectType
   obj: Record<string, any>
   keys: string[]
-  onEnd?: (obj: Record<string, any>, indexes: (string | number)[]) => void
+  onEnd?: (
+    obj: Record<string, any>,
+    jrs: ObjectType,
+    indexes: (string | number)[]
+  ) => void
   onBeforeEnd?: (
     obj: Record<string, any>,
+    jrs: ObjectType,
     lastKey: string,
     indexes: (string | number)[]
   ) => void
   indexes: (string | number)[]
+  bypassValidation?: boolean
 }) {
   const { jrs, obj, keys, onEnd, onBeforeEnd, indexes } = props
 
   if (jrs.isCorrectType(obj) === false) {
+    console.log(JSON.stringify(obj, null, 2))
+    console.log(buildTsType(jrs))
     throw Error('Given obj has a different structure from the given JRS.')
   }
 
   // Last key
   if (keys.length === 0) {
-    onEnd?.(obj as object, [...indexes])
+    onEnd?.(obj as object, jrs, [...indexes])
     return
   }
 
   // Before the last key,
   // if the onBeforeEnd exists, execute it and early return.
   if (keys.length === 1 && onBeforeEnd !== undefined) {
-    onBeforeEnd(obj as object, keys[0], [...indexes])
+    onBeforeEnd(obj as object, jrs, keys[0], [...indexes])
     return
   }
 
@@ -97,7 +107,7 @@ function testObject(props: {
 
   // Empty keys
   if (currentKey === '' || currentKey === undefined) {
-    onEnd?.(obj as object, [...indexes])
+    onEnd?.(obj as object, jrs, [...indexes])
     return
   }
 
@@ -118,7 +128,6 @@ function testObject(props: {
       indexes: [...indexes],
     })
   } else if (nextJrs.typeName === 'record') {
-    console.log('record')
     Object.entries(nextObj).forEach(([recordKey, value]) => {
       const nextIndexes = [...indexes]
       nextIndexes.push(recordKey)
@@ -154,10 +163,18 @@ function testObject(props: {
 class Migrator<Schema extends JsonRuntimeSchema> {
   constructor(
     private previousSchema: Schema,
-    private rules: (Add<Schema> | Remove<Schema> | ChangeType<Schema>)[]
+    private rules: (
+      | Add<Schema>
+      | Remove<Schema>
+      | ChangeType<Schema>
+      | Move<Schema>
+    )[]
   ) {}
 
-  public migrate(data: InferType<typeof this.previousSchema>) {
+  public migrate(data: InferType<typeof this.previousSchema>): {
+    data: any
+    jrs: JsonRuntimeSchema
+  } {
     // Validate the data first
     if (this.validate(data) === false) {
       throw Error(`Given data doesn't fit to the schema.`)
@@ -168,58 +185,142 @@ class Migrator<Schema extends JsonRuntimeSchema> {
     // const newSchema
 
     for (const rule of this.rules) {
-      const keys = (rule.options.at as string).split('.')
-      const commonArgs = {
-        jrs: this.previousSchema,
-        obj: migratedData,
-        keys,
-        indexes: [],
-      }
+      if (rule instanceof Move) {
+        console.log('move')
+        const fromKeys = (rule.options.from as string).split('.')
+        const toKeys = (rule.options.to.path as string).split('.')
 
-      if (rule instanceof Add) {
-        console.log('add')
-        testObject({
-          ...commonArgs,
-          onEnd: (obj, indexes) => {
-            // If the property is optional and the given value is undefined,
-            // don't add the property
-            if (
-              rule.options.property.optional === true &&
-              rule.options.value === undefined
-            ) {
-              return
-            }
+        let tempData: any = undefined
+        let tempProperty: Property | undefined = undefined
+        let targetJrs: ObjectType | undefined = undefined
+        let targetKey: string = ''
 
-            // Add the property
-            // - if the value is function -> execute
-            // - else: assign the value
-            obj[rule.options.property.key] =
-              typeof rule.options.value === 'function'
-                ? rule.options.value(JSON.parse(JSON.stringify(data)), indexes)
-                : rule.options.value
-          },
-        })
-      } else if (rule instanceof Remove) {
         testObject({
-          ...commonArgs,
-          onBeforeEnd: (obj, lastKey) => {
+          jrs: this.previousSchema,
+          obj: migratedData,
+          keys: fromKeys,
+          indexes: [],
+          onBeforeEnd: (obj, jrs, lastKey) => {
+            targetJrs = jrs
+            targetKey = lastKey
+            tempData = obj[lastKey]
             delete obj[lastKey]
           },
         })
-      } else if (rule instanceof ChangeType) {
+
+        if (targetJrs) {
+          tempProperty = (targetJrs as ObjectType).removeProperty(targetKey)
+        }
+
         testObject({
-          ...commonArgs,
-          onBeforeEnd: (obj, lastKey, indexes) => {
-            obj[lastKey] =
-              typeof rule.options.value === 'function'
-                ? rule.options.value(JSON.parse(JSON.stringify(data)), indexes)
-                : rule.options.value
+          jrs: this.previousSchema,
+          obj: migratedData,
+          keys: toKeys,
+          indexes: [],
+          onEnd: (obj, jrs) => {
+            obj[rule.options.to.key] = tempData
+            targetJrs = jrs
           },
         })
+
+        if (targetJrs && tempProperty) {
+          tempProperty.key = rule.options.to.key
+          ;(targetJrs as ObjectType).addProperty(tempProperty)
+        }
+      } else {
+        const keys = (rule.options.at as string).split('.')
+        const commonArgs = {
+          jrs: this.previousSchema,
+          obj: migratedData,
+          keys,
+          indexes: [],
+        }
+
+        if (rule instanceof Add) {
+          console.log('add')
+          let targetJrs: ObjectType | undefined = undefined
+
+          testObject({
+            ...commonArgs,
+            onEnd: (obj, jrs, indexes) => {
+              // If the property is optional and the given value is undefined,
+              // don't add the property
+              if (
+                rule.options.property.optional === true &&
+                rule.options.value === undefined
+              ) {
+                return
+              }
+
+              // Add the property
+              // - if the value is function -> execute
+              // - else: assign the value
+              obj[rule.options.property.key] =
+                typeof rule.options.value === 'function'
+                  ? rule.options.value(
+                      JSON.parse(JSON.stringify(data)),
+                      indexes
+                    )
+                  : rule.options.value
+
+              targetJrs = jrs
+            },
+          })
+
+          if (targetJrs) {
+            ;(targetJrs as ObjectType).addProperty(rule.options.property)
+          }
+        } else if (rule instanceof Remove) {
+          console.log('remove')
+          let targetJrs: ObjectType | undefined = undefined
+          let targetKey: string = ''
+
+          testObject({
+            ...commonArgs,
+            onBeforeEnd: (obj, jrs, lastKey) => {
+              targetJrs = jrs
+              targetKey = lastKey
+              delete obj[lastKey]
+            },
+          })
+
+          if (targetJrs) {
+            ;(targetJrs as ObjectType).removeProperty(targetKey)
+          }
+        } else if (rule instanceof ChangeType) {
+          let targetJrs: ObjectType | undefined = undefined
+          let targetKey: string = ''
+
+          testObject({
+            ...commonArgs,
+            onBeforeEnd: (obj, jrs, lastKey, indexes) => {
+              targetJrs = jrs
+              targetKey = lastKey
+              obj[lastKey] =
+                typeof rule.options.value === 'function'
+                  ? rule.options.value(
+                      JSON.parse(JSON.stringify(data)),
+                      indexes
+                    )
+                  : rule.options.value
+            },
+          })
+
+          if (targetJrs) {
+            ;(targetJrs as ObjectType).properties[
+              (targetJrs as ObjectType).properties.findIndex(
+                ({ key }) => key === targetKey
+              )
+            ].updateType(rule.options.type)
+          }
+        }
       }
     }
 
-    return migratedData
+    return {
+      data: migratedData,
+      jrs: this.previousSchema,
+    }
   }
 
   private validate(data: unknown) {
@@ -275,14 +376,37 @@ const migrator = new Migrator(sample, [
       defaultValue: 'what',
     }),
     at: 'sections.hello',
-    value: 'hello',
+    value: (json, indexes) => {
+      return json.sections[indexes[0] as number].what
+    },
   }),
-  remove({ at: 'sections.hello' }),
+  remove({ at: 'sections.hello.test' }),
+  changeType({
+    at: 'blocks.styles',
+    type: record(number()),
+    value: (json) => {
+      const obj: Record<string, number> = {}
+      Object.entries(json.blocks).forEach(([key, value]) => {
+        obj[key] = value.styles.padding
+      })
+      return obj
+    },
+  }),
+  move({
+    from: 'blocks',
+    to: {
+      path: '',
+      key: 'myBlocks',
+    },
+  }),
 ])
 
 const oldData: InferType<typeof sample> = {
   version: '1.0.0',
-  sections: [{ what: 'what', hello: [{ test: 0 }] }],
+  sections: [
+    { what: 'what', hello: [{ test: 0 }] },
+    { what: 'what2', hello: [{ test: 1 }, { test: 2 }] },
+  ],
   info: {
     createdAt: '',
   },
@@ -336,9 +460,10 @@ const oldData: InferType<typeof sample> = {
 //   },
 // })
 
-const m = migrator.migrate(oldData)
+const { data: m, jrs } = migrator.migrate(oldData)
 
 console.log(JSON.stringify(m, null, 2))
+console.log(buildTsType(jrs))
 
 type Test<T> = T extends Record<string, unknown>
   ? string extends keyof T
