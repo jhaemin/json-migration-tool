@@ -33,7 +33,7 @@ export class RecordType<ValueType extends Type = Type> implements Type {
   }
 
   isCorrectType(value: unknown) {
-    if (typeof value !== 'object') {
+    if (typeof value !== 'object' || Array.isArray(value)) {
       return false
     }
 
