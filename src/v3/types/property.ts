@@ -74,6 +74,10 @@ defaultValue: ${JSON.stringify(this.defaultValue, null, 2)},`
   isCorrectDefaultValue(value: InferType<T>) {
     return this.type.isCorrectType(value)
   }
+
+  updateType(newType: Type) {
+    this.type = newType as T
+  }
 }
 
 export function property<
