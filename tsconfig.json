@@ -13,7 +13,8 @@
     "baseUrl": "./",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "plugins": [{ "transform": "@zerollup/ts-transform-paths" }]
   },
   "exclude": ["__TEST__"]
 }
