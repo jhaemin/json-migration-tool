@@ -1,6 +1,4 @@
-import { JsonRuntimeSchema } from '../../jrs/common'
-import { InferType } from '../../jrs/helpers'
-import { Property } from '../../jrs/property'
+import { InferType, JsonRuntimeSchema, Property } from '@/jrs'
 import { PropertyPath } from '../types'
 
 /**

@@ -1,4 +1,4 @@
-import { JsonRuntimeSchema } from '../../jrs/common'
+import { JsonRuntimeSchema } from '@/jrs'
 import { PropertyPath } from '../types'
 
 export class Remove<

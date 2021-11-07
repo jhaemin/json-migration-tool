@@ -9,7 +9,11 @@
     "noEmit": false,
     "outDir": "./dist",
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "exclude": ["__TEST__"]
 }

@@ -1,5 +1,4 @@
-import { JsonRuntimeSchema, Type } from '../../jrs/common'
-import { InferType } from '../../jrs/helpers'
+import { InferType, JsonRuntimeSchema, Type } from '@/jrs'
 import { PropertyPath } from '../types'
 
 export class Change<
