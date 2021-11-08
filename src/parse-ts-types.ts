@@ -225,9 +225,5 @@ export function parseTsTypes(
     throw Error(`Given root type alias is not an object type.`)
   }
 
-  return buildTsType(rootTypeAlias)
+  return rootTypeAlias
 }
-
-const tsType = parseTsTypes(fs.readFileSync('./src/v3/test.ts', 'utf8'))
-
-console.log(tsType)
