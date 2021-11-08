@@ -1,4 +1,5 @@
 import { Type } from './common'
+import { camelCase } from 'change-case'
 
 export class ArrayType<ItemType extends Type = Type> implements Type {
   public typeName: 'array' = 'array'
@@ -11,6 +12,16 @@ export class ArrayType<ItemType extends Type = Type> implements Type {
   }
 
   _buildTsType(aliases: Map<string, string>) {
+    const arrayStr = `(${this.itemType._buildTsType(aliases)})[]`
+
+    if (this.alias !== undefined) {
+      aliases.set(this.alias, arrayStr)
+
+      return this.alias
+    }
+
+    return arrayStr
+  }
 
   _raw(aliases: Map<string, string>) {
     const arraySourceCode = `${this.typeName}(${this.itemType._raw(aliases)})`
