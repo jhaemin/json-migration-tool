@@ -32,12 +32,20 @@ ${this.properties
     return objStr
   }
 
-  raw() {
+  _raw(aliases: Map<string, string>) {
     const optionsString = valueToString(this.options)
-
-    return `${this.typeName}([${this.properties
-      .map((property) => property.raw())
+    const objectSourceCode = `${this.typeName}([${this.properties
+      .map((property) => property._raw(aliases))
       .join(', ')}]${optionsString ? `, ${optionsString}` : ''})`
+
+    if (this.alias !== undefined) {
+      const variableName = camelCase(this.alias)
+      aliases.set(variableName, objectSourceCode)
+
+      return variableName
+    }
+
+    return objectSourceCode
   }
 
   private compare(object: Record<string, unknown>): boolean {

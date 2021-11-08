@@ -1,4 +1,5 @@
 import { Type, valueToString } from './common'
+import { camelCase } from 'change-case'
 
 export class TupleType<ItemTypes extends Type[] = Type[]> implements Type {
   public typeName: 'tuple' = 'tuple'
@@ -18,12 +19,20 @@ export class TupleType<ItemTypes extends Type[] = Type[]> implements Type {
       .join(', ')}]`
   }
 
-  raw() {
+  _raw(aliases: Map<string, string>) {
     const optionsString = valueToString(this.options)
-
-    return `${this.typeName}([${this.itemTypes
-      .map((itemType) => itemType.raw())
+    const tupleSourceCode = `${this.typeName}([${this.itemTypes
+      .map((itemType) => itemType._raw(aliases))
       .join(', ')}]${optionsString ? `, ${optionsString}` : ''})`
+
+    if (this.alias !== undefined) {
+      const variableName = camelCase(this.alias)
+      aliases.set(variableName, tupleSourceCode)
+
+      return variableName
+    }
+
+    return tupleSourceCode
   }
 
   isCorrectType(value: unknown) {

@@ -13,8 +13,7 @@ export interface Type {
     | 'union'
     | 'intersection'
   alias?: string
-  _buildTsType(aliases: Map<string, string>, isRoot?: boolean): string
-  raw(): string
+  _raw(aliases: Map<string, string>): string
   isCorrectType(value: unknown): boolean
 }
 

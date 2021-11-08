@@ -96,9 +96,22 @@ export function buildTsType(json: JsonRuntimeSchema) {
     typeStr += `type ${key} = ${value}\n\n`
   })
 
-  typeStr += `type ${json.alias ?? 'Root'} = ${rootTypeStr}`
-
   return prettier.format(typeStr, prettierOptions)
+}
+
+export function buildJrsSourceCode(jrs: JsonRuntimeSchema) {
+  const aliases: Map<string, string> = new Map()
+  jrs._raw(aliases)
+
+  let sourceCode = ''
+
+  aliases.forEach((value, key) => {
+    sourceCode += `${
+      key === camelCase(jrs.alias ?? '') ? 'export ' : ''
+    }const ${key} = ${value}\n\n`
+  })
+
+  return prettier.format(sourceCode, prettierOptions)
 }
 
 export function isJRS(value: any) {
@@ -106,10 +119,6 @@ export function isJRS(value: any) {
 }
 
 // console.log(buildTsType(sample))
-
-function raw(json: JsonRuntimeSchema) {
-  return prettier.format(json.raw(), prettierOptions)
-}
 
 // console.log(buildTsType(json))
 

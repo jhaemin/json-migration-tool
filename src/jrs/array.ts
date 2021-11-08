@@ -11,11 +11,18 @@ export class ArrayType<ItemType extends Type = Type> implements Type {
   }
 
   _buildTsType(aliases: Map<string, string>) {
-    return `(${this.itemType._buildTsType(aliases)})[]`
-  }
 
-  raw() {
-    return `${this.typeName}(${this.itemType.raw()})`
+  _raw(aliases: Map<string, string>) {
+    const arraySourceCode = `${this.typeName}(${this.itemType._raw(aliases)})`
+
+    if (this.alias !== undefined) {
+      const variableName = camelCase(this.alias)
+      aliases.set(variableName, arraySourceCode)
+
+      return variableName
+    }
+
+    return arraySourceCode
   }
 
   isCorrectType(value: unknown) {

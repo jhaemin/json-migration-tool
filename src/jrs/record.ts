@@ -1,4 +1,5 @@
 import { Type, valueToString } from './common'
+import { camelCase } from 'change-case'
 
 export class RecordType<ValueType extends Type = Type> implements Type {
   public typeName = 'record' as const
@@ -24,12 +25,20 @@ export class RecordType<ValueType extends Type = Type> implements Type {
     return recordStr
   }
 
-  raw() {
+  _raw(aliases: Map<string, string>) {
     const optionsString = valueToString(this.options)
-
-    return `${this.typeName}(${this.valueType.raw()}${
+    const recordSourceCode = `${this.typeName}(${this.valueType._raw(aliases)}${
       optionsString ? `, ${optionsString}` : ''
     })`
+
+    if (this.alias !== undefined) {
+      const variablesName = camelCase(this.alias)
+      aliases.set(variablesName, recordSourceCode)
+
+      return variablesName
+    }
+
+    return recordSourceCode
   }
 
   isCorrectType(value: unknown) {

@@ -13,7 +13,7 @@ export class PrimitiveType<Literal extends string | number | boolean>
       : JSON.stringify(this.literal)
   }
 
-  raw() {
+  _raw() {
     let literal = this.literal === undefined ? '' : JSON.stringify(this.literal)
 
     return `${this.typeName}(${literal})`
