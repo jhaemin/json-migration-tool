@@ -1,5 +1,6 @@
 import { Type, valueToString } from './common'
 import { Property } from './property'
+import { camelCase } from 'change-case'
 
 export class ObjectType<P extends Property[] = Property[]> implements Type {
   public typeName = 'object' as const
@@ -13,15 +14,11 @@ export class ObjectType<P extends Property[] = Property[]> implements Type {
     this.options = options
   }
 
-  _buildTsType(aliases: Map<string, string>, isRoot?: boolean) {
+  _buildTsType(aliases: Map<string, string>) {
     let objStr = `{
 ${this.properties
   .map((property) => property._buildTsType(aliases))
   .join('; ')} }`
-
-    if (isRoot) {
-      return objStr
-    }
 
     if (this.alias !== undefined) {
       aliases.set(this.alias, objStr)

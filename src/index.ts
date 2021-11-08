@@ -8,6 +8,7 @@ import { record } from './jrs/record'
 import { string } from './jrs/string'
 import { tuple } from './jrs/tuple'
 import { union } from './jrs/union'
+import { camelCase } from 'change-case'
 
 const json = object(
   [
@@ -88,12 +89,12 @@ const prettierOptions: prettier.Options = {
 
 export function buildTsType(json: JsonRuntimeSchema) {
   const aliases: Map<string, string> = new Map()
-  const rootTypeStr = json._buildTsType(aliases, true)
+  json._buildTsType(aliases)
 
   let typeStr = ''
 
   aliases.forEach((value, key) => {
-    typeStr += `type ${key} = ${value}\n\n`
+    typeStr += `export type ${key} = ${value}\n\n`
   })
 
   return prettier.format(typeStr, prettierOptions)
