@@ -1,8 +1,7 @@
-import fs from 'fs'
 import ts from 'typescript'
-import { buildTsType } from '.'
 import { array } from './jrs/array'
 import { Type } from './jrs/common'
+import { intersection } from './jrs/intersection'
 import { number } from './jrs/number'
 import { object, ObjectType } from './jrs/object'
 import { Property, property } from './jrs/property'
@@ -23,6 +22,7 @@ import { union } from './jrs/union'
 // ArrayType = 181,
 // TupleType = 182,
 // UnionType = 185,
+// IntersectionType = 186,
 // ParenthesizedType = 189,
 // TypeAliasDeclaration = 257,
 
@@ -91,10 +91,30 @@ function typeNodeToJRS(
     return object(properties as Property[], { alias: typeAliasName })
   }
 
+  // Union
   // SomeType1 | SomeType2
   if (ts.isUnionTypeNode(node)) {
     return union(
       node.types.map((type) => typeNodeToJRS(type, typeAliases)),
+      { alias: typeAliasName }
+    )
+  }
+
+  // Intersection
+  // SomeType & SomeType 2
+  if (ts.isIntersectionTypeNode(node)) {
+    return intersection(
+      node.types.map((type) => {
+        const jrs = typeNodeToJRS(type, typeAliases)
+
+        if (jrs.typeName !== 'object') {
+          throw Error(
+            'Only object literal type could be a member of intersection.'
+          )
+        }
+
+        return jrs as ObjectType
+      }),
       { alias: typeAliasName }
     )
   }

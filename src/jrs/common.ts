@@ -11,6 +11,7 @@ export interface Type {
     | 'boolean'
     | 'null'
     | 'union'
+    | 'intersection'
   alias?: string
   _buildTsType(aliases: Map<string, string>, isRoot?: boolean): string
   raw(): string
