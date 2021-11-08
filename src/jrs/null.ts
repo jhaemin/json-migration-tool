@@ -7,7 +7,7 @@ export class NullType implements Type {
     return 'null'
   }
 
-  raw() {
+  _raw() {
     return 'nil()'
   }
 
