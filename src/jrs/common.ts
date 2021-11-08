@@ -45,8 +45,15 @@ export function valueToString(value: any) {
 
     if (properties) {
       return `{ ${properties} }`
+    } else {
+      return `{}`
     }
   }
 
-  return `'unsupported type'`
+  console.log('value:')
+  console.log(value)
+  console.log('type:')
+  console.log(type)
+
+  throw Error(`Unsupported type of value to convert to string.`)
 }
