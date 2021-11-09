@@ -47,7 +47,7 @@ export class Property<
     }: ${this.type._buildTsType(aliases)}`
   }
 
-  _raw(aliases: Map<string, string>) {
+  _buildSourceCode(aliases: Map<string, string>) {
     let optionsRaw = ''
 
     if (this.optional === true || this.defaultValue !== undefined) {
@@ -68,7 +68,9 @@ defaultValue: ${JSON.stringify(this.defaultValue, null, 2)},`
       optionsRaw += ' }'
     }
 
-    return `property('${this.key}', ${this.type._raw(aliases)}${optionsRaw})`
+    return `property('${this.key}', ${this.type._buildSourceCode(
+      aliases
+    )}${optionsRaw})`
   }
 
   isCorrectDefaultValue(value: InferType<T>) {

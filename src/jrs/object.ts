@@ -29,10 +29,10 @@ ${this.properties
     return objStr
   }
 
-  _raw(aliases: Map<string, string>) {
+  _buildSourceCode(aliases: Map<string, string>) {
     const optionsString = valueToString(this.options)
     const objectSourceCode = `${this.typeName}([${this.properties
-      .map((property) => property._raw(aliases))
+      .map((property) => property._buildSourceCode(aliases))
       .join(', ')}]${optionsString ? `, ${optionsString}` : ''})`
 
     if (this.alias !== undefined) {

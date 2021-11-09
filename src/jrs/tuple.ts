@@ -19,10 +19,10 @@ export class TupleType<ItemTypes extends Type[] = Type[]> implements Type {
       .join(', ')}]`
   }
 
-  _raw(aliases: Map<string, string>) {
+  _buildSourceCode(aliases: Map<string, string>) {
     const optionsString = valueToString(this.options)
     const tupleSourceCode = `${this.typeName}([${this.itemTypes
-      .map((itemType) => itemType._raw(aliases))
+      .map((itemType) => itemType._buildSourceCode(aliases))
       .join(', ')}]${optionsString ? `, ${optionsString}` : ''})`
 
     if (this.alias !== undefined) {

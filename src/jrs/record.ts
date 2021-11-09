@@ -25,9 +25,11 @@ export class RecordType<ValueType extends Type = Type> implements Type {
     return recordStr
   }
 
-  _raw(aliases: Map<string, string>) {
+  _buildSourceCode(aliases: Map<string, string>) {
     const optionsString = valueToString(this.options)
-    const recordSourceCode = `${this.typeName}(${this.valueType._raw(aliases)}${
+    const recordSourceCode = `${
+      this.typeName
+    }(${this.valueType._buildSourceCode(aliases)}${
       optionsString ? `, ${optionsString}` : ''
     })`
 

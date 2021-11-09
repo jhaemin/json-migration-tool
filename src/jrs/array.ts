@@ -23,8 +23,10 @@ export class ArrayType<ItemType extends Type = Type> implements Type {
     return arrayStr
   }
 
-  _raw(aliases: Map<string, string>) {
-    const arraySourceCode = `${this.typeName}(${this.itemType._raw(aliases)})`
+  _buildSourceCode(aliases: Map<string, string>) {
+    const arraySourceCode = `${this.typeName}(${this.itemType._buildSourceCode(
+      aliases
+    )})`
 
     if (this.alias !== undefined) {
       const variableName = camelCase(this.alias)

@@ -14,7 +14,7 @@ export interface Type {
     | 'intersection'
   alias?: string
   _buildTsType(aliases: Map<string, string>): string
-  _raw(aliases: Map<string, string>): string
+  _buildSourceCode(aliases: Map<string, string>): string
   isCorrectType(value: unknown): boolean
 }
 

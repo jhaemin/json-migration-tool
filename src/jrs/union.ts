@@ -27,10 +27,10 @@ export class Union<T extends Type[]> implements Type {
     return unionStr
   }
 
-  _raw(aliases: Map<string, string>) {
+  _buildSourceCode(aliases: Map<string, string>) {
     const optionsString = valueToString(this.options)
     const unionSourceCode = `union([
-${this.types.map((type) => type._raw(aliases)).join(',\n')}
+${this.types.map((type) => type._buildSourceCode(aliases)).join(',\n')}
 ]${optionsString ? `, ${optionsString}` : ''})`
 
     if (this.alias !== undefined) {

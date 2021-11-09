@@ -102,7 +102,7 @@ export function buildTsType(json: JsonRuntimeSchema) {
 
 export function buildJrsSourceCode(jrs: JsonRuntimeSchema) {
   const aliases: Map<string, string> = new Map()
-  jrs._raw(aliases)
+  jrs._buildSourceCode(aliases)
 
   let sourceCode = ''
 

@@ -33,10 +33,10 @@ export class Intersection<T extends ObjectType[]> implements Type {
     return intersectionStr
   }
 
-  _raw(aliases: Map<string, string>) {
+  _buildSourceCode(aliases: Map<string, string>) {
     const optionsString = valueToString(this.options)
     const intersectionSourceCode = `intersection([
-${this.types.map((type) => type._raw(aliases)).join(',\n')}
+${this.types.map((type) => type._buildSourceCode(aliases)).join(',\n')}
 ]${optionsString ? `, ${optionsString}` : ''})`
 
     if (this.alias !== undefined) {

@@ -7,7 +7,7 @@ export class NullType implements Type {
     return 'null'
   }
 
-  _raw() {
+  _buildSourceCode() {
     return 'nil()'
   }
 
