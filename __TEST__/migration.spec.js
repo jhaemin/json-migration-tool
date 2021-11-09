@@ -7,7 +7,7 @@ const equal = require('fast-deep-equal')
 // console.log(JSON.stringify(migratedData, null, 2))
 // console.log(buildTsType(jrs))
 
-test('Test 1', () => {
+test('Migration Test 1', () => {
   const jrs = object([
     property('version', string()),
     property(
