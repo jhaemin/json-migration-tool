@@ -9,6 +9,11 @@
   },
   "author": "Jang Haemin",
   "license": "MIT",
+  "jest": {
+    "testMatch": [
+      "**/*.spec.[jt]s"
+    ]
+  },
   "devDependencies": {
     "@types/jest": "^27.0.2",
     "@types/prettier": "^2.4.1",
