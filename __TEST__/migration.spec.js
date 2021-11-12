@@ -58,3 +58,28 @@ test('Migration Test 1', () => {
     })
   ).toBe(true)
 })
+
+test('Migration Test 2', () => {
+  const jrs = object([property('foo', string(), { optional: true })])
+
+  /** @type {import('../dist/jrs').InferType<typeof jrs>} */
+  const data = {
+    foo: 'hello',
+  }
+
+  const migrator = new Migrator(jrs, [
+    change({
+      at: 'foo',
+      type: string(),
+      value: '3',
+    }),
+  ])
+
+  const { data: migratedData } = migrator.migrate(data)
+
+  expect(
+    equal(migratedData, {
+      foo: '3',
+    })
+  ).toBe(true)
+})
