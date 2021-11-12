@@ -16,5 +16,5 @@
     },
     "plugins": [{ "transform": "@zerollup/ts-transform-paths" }]
   },
-  "exclude": ["__TEST__"]
+  "exclude": ["__tests__"]
 }
